@@ -1,10 +1,11 @@
-import { Cpu, Eye, Server, ArrowRight } from "lucide-react";
+import { Cpu, Eye, Radio, ArrowRight } from "lucide-react";
 
 const commands = [
   {
     group: "wallet",
     items: [
-      { cmd: "npx stelagent wallet login -e you@example.com", desc: "OTP login" },
+      { cmd: "npx stelagent wallet login -e you@example.com", desc: "Request OTP" },
+      { cmd: "npx stelagent wallet verify -e you@example.com -o 123456", desc: "Verify OTP" },
       { cmd: "npx stelagent wallet address", desc: "Show public key" },
       { cmd: "npx stelagent wallet balance", desc: "Check balances" },
       { cmd: "npx stelagent wallet transfer -t GDXXX... -a 10", desc: "Send XLM" },
@@ -23,17 +24,20 @@ const commands = [
   {
     group: "assets",
     items: [
-      { cmd: "npx stelagent assets search --code USDC", desc: "Search assets" },
-      { cmd: "npx stelagent assets orderbook --selling XLM --buying USDC", desc: "Order book" },
+      { cmd: "npx stelagent assets search -c USDC", desc: "Search assets" },
+      { cmd: "npx stelagent assets orderbook -s native -b USDC:GAXYZ...", desc: "Order book" },
     ],
   },
   {
-    group: "actions",
+    group: "payments",
     items: [
-      { cmd: "npx stelagent send <destination> <amount> --asset native", desc: "Send payment" },
+      { cmd: "npx stelagent send GDXXX... 100 -a USDC:GAXYZ...", desc: "Send asset" },
       { cmd: "npx stelagent pay https://api.example.com/premium", desc: "x402 micropayment" },
-      { cmd: "npx stelagent fee", desc: "Current fee stats" },
     ],
+  },
+  {
+    group: "network",
+    items: [{ cmd: "npx stelagent fee", desc: "Fee stats" }],
   },
   {
     group: "monitor",
@@ -45,26 +49,30 @@ const commands = [
   },
 ];
 
-const skills = [
+const skillGroups = [
   {
     icon: Cpu,
-    name: "stellar-wallet",
-    triggers: ["wallet", "balance", "transfer", "login"],
+    name: "Authentication",
+    capabilities: ["Wallet login via email OTP", "Session management and recovery"],
   },
   {
     icon: Eye,
-    name: "stellar-account",
-    triggers: ["account", "transactions", "payments", "effects"],
-  },
-  {
-    icon: Server,
-    name: "stellar-monitor",
-    triggers: ["stream", "watch", "real-time", "SSE"],
+    name: "Querying",
+    capabilities: [
+      "Account details and history",
+      "Asset search and order books",
+      "Network fee stats",
+    ],
   },
   {
     icon: ArrowRight,
-    name: "stellar-pay",
-    triggers: ["pay", "x402", "micropayment", "send"],
+    name: "Transacting",
+    capabilities: ["XLM and custom asset transfers", "x402 micropayments for API access"],
+  },
+  {
+    icon: Radio,
+    name: "Monitoring",
+    capabilities: ["Real-time streaming via Horizon SSE", "Transactions, payments, and effects"],
   },
 ];
 
@@ -78,26 +86,27 @@ export function Commands() {
               Agents know what to do.
             </h2>
             <p className="text-muted text-lg leading-relaxed mb-8">
-              Each command is a skill with declared trigger phrases. AI agents match intent to
-              action automatically, and&nbsp;expose the same surface as an MCP server for tool-use.
+              A single skill — <span className="font-mono text-foreground">stelagent-cli</span> —
+              covers the full Stellar surface. AI agents match intent to action automatically,
+              and&nbsp;expose the same commands as an MCP server for tool-use.
             </p>
           </div>
 
           <div className="space-y-4">
             <h3 className="text-sm px-8 font-semibold uppercase tracking-wider text-muted">
-              Skill Definitions
+              Skill Capabilities
             </h3>
-            {skills.map((skill) => (
+            {skillGroups.map((group) => (
               <div
-                key={skill.name}
+                key={group.name}
                 className="flex items-start gap-3 py-3 border-y border-border px-8"
               >
                 <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded bg-surface-secondary">
-                  <skill.icon className="h-3.5 w-3.5 text-foreground" />
+                  <group.icon className="h-3.5 w-3.5 text-foreground" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm font-mono">{skill.name}</p>
-                  <p className="text-xs text-muted mt-0.5">triggers: {skill.triggers.join(", ")}</p>
+                  <p className="font-semibold text-sm">{group.name}</p>
+                  <p className="text-xs text-muted mt-0.5">{group.capabilities.join(" · ")}</p>
                 </div>
               </div>
             ))}
