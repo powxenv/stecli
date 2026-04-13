@@ -218,10 +218,6 @@ Every command call is logged to `~/.stelagent/audit.jsonl` with timestamp, comma
 - **Transaction history export** — export account history as CSV or JSON for bookkeeping
 - **Webhook notifications** — push alerts to a URL when an account receives a payment
 
-### Dashboard
-
-- **Website rebuild** — the TanStack Start dashboard was deprioritized during CLI development. A clean read-only dashboard for browsing account history and monitoring activity is on the list.
-
 ## Contributing
 
 ```bash
