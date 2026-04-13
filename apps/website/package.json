@@ -9,8 +9,7 @@
     "dev": "bun run skills:build && vp dev --port 3000",
     "build": "bun run skills:build && vp build",
     "preview": "bun run build && vp preview",
-    "deploy": "bun run build && wrangler deploy",
-    "cf-typegen": "wrangler types",
+    "deploy": "bun run build && netlify deploy --prod",
     "test": "vp test run",
     "email:dev": "email dev --port 3022",
     "skills:build": "bun run scripts/build-skills-index.ts"
@@ -43,8 +42,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.31.2",
     "@iconify-json/hugeicons": "^1.2.25",
+    "@netlify/vite-plugin-tanstack-start": "^1.0.1",
     "@react-email/preview-server": "5.2.10",
     "@svgr/core": "^8.1.0",
     "@svgr/plugin-jsx": "^8.1.0",
@@ -63,8 +62,7 @@
     "unplugin-icons": "^23.0.1",
     "vite": "catalog:",
     "vite-plus": "catalog:",
-    "vitest": "catalog:",
-    "wrangler": "^4.81.1"
+    "vitest": "catalog:"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
