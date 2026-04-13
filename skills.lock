@@ -5,6 +5,12 @@
       "url": "https://github.com/resend/react-email.git",
       "branch": "main",
       "commit": "b4a91a67313d73668efbdf005a276cb240d2dc78"
+    },
+    "skill:skill-creator": {
+      "name": "skill-creator",
+      "url": "https://github.com/openai/skills.git",
+      "branch": "main",
+      "commit": "0ed2046f287a92b5f4bcace213dcb3cc5f094cb9"
     }
   }
 }
