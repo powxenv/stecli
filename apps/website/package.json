@@ -23,6 +23,7 @@
     "@react-email/components": "1.0.12",
     "@stellar/stellar-base": "^15.0.0",
     "@stellar/stellar-sdk": "^15.0.1",
+    "@t3-oss/env-core": "^0.13.10",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-query": "^5.99.0",
@@ -38,7 +39,8 @@
     "react-dom": "19.2.5",
     "react-hook-form": "^7.72.1",
     "resend": "^6.10.0",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.31.2",

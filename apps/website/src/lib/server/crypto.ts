@@ -1,5 +1,5 @@
 import { randomBytes, scryptSync, createCipheriv, createDecipheriv } from "node:crypto";
-import { env } from "cloudflare:workers";
+import { env } from "#/env.ts";
 
 const ENCRYPTION_KEY_LENGTH = 32;
 

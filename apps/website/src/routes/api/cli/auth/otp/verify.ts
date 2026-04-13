@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { randomBytes } from "node:crypto";
 import { eq, and, gt, sql } from "drizzle-orm";
 import { walletSessions, otpCodes } from "#/db/schema";
-import { getDb } from "#/db/index.ts";
+import { db } from "#/db/index.ts";
 
 export const Route = createFileRoute("/api/cli/auth/otp/verify")({
   server: {
@@ -15,8 +15,6 @@ export const Route = createFileRoute("/api/cli/auth/otp/verify")({
         if (!body.email || !body.otp) {
           return Response.json({ ok: false, error: "Email and OTP are required" }, { status: 400 });
         }
-
-        const db = getDb();
 
         const records = await db
           .select()

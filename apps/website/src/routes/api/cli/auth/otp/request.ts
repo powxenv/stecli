@@ -3,9 +3,9 @@ import { randomBytes } from "node:crypto";
 import { createElement } from "react";
 import { eq, and, gt } from "drizzle-orm";
 import { render } from "@react-email/components";
-import { getResend } from "#/lib/server/resend.ts";
+import { resend } from "#/lib/server/resend.ts";
 import { otpCodes } from "#/db/schema";
-import { getDb } from "#/db/index.ts";
+import { db } from "#/db/index.ts";
 import OtpEmail from "../../../../../../emails/email.tsx";
 
 export const Route = createFileRoute("/api/cli/auth/otp/request")({
@@ -21,8 +21,6 @@ export const Route = createFileRoute("/api/cli/auth/otp/request")({
         const code = randomDigits(6);
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-        const db = getDb();
-
         await db
           .delete(otpCodes)
           .where(and(eq(otpCodes.email, email), gt(otpCodes.expiresAt, new Date())));
@@ -35,7 +33,7 @@ export const Route = createFileRoute("/api/cli/auth/otp/request")({
 
         const html = await render(createElement(OtpEmail, { otp: code, email }));
 
-        const { error } = await getResend().emails.send({
+        const { error } = await resend.emails.send({
           from: "Stelagent <send@mail.stelagent.noval.me>",
           to: [email],
           subject: `Your verification code is ${code}`,

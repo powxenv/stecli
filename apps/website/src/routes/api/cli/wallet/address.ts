@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
 import { wallets } from "#/db/schema";
-import { getDb } from "#/db/index.ts";
+import { db } from "#/db/index.ts";
 import { authenticate } from "#/lib/server/auth.ts";
 
 export const Route = createFileRoute("/api/cli/wallet/address")({
@@ -12,8 +12,6 @@ export const Route = createFileRoute("/api/cli/wallet/address")({
         if (!email) {
           return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
         }
-
-        const db = getDb();
 
         const result = await db.select().from(wallets).where(eq(wallets.email, email)).limit(1);
 

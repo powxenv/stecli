@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
 import { Keypair } from "@stellar/stellar-base";
 import { wallets } from "#/db/schema";
-import { getDb } from "#/db/index.ts";
+import { db } from "#/db/index.ts";
 import { decryptSecretKey } from "#/lib/server/crypto.ts";
 import { authenticate } from "#/lib/server/auth.ts";
 
@@ -24,8 +24,6 @@ export const Route = createFileRoute("/api/cli/wallet/sign")({
         if (!body.transactionXdr) {
           return Response.json({ ok: false, error: "transactionXdr is required" }, { status: 400 });
         }
-
-        const db = getDb();
 
         const result = await db.select().from(wallets).where(eq(wallets.email, email)).limit(1);
 
