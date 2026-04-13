@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
 import { Keypair } from "@stellar/stellar-base";
-import { walletSessions, wallets } from "#/db/schema";
+import { wallets } from "#/db/schema";
 import { db } from "#/db/index.ts";
 import { encryptSecretKey, decryptSecretKey } from "#/lib/server/crypto.ts";
+import { authenticate } from "#/lib/server/auth.ts";
 
 export const Route = createFileRoute("/api/cli/wallet/create")({
   server: {
@@ -66,22 +67,3 @@ export const Route = createFileRoute("/api/cli/wallet/create")({
     },
   },
 });
-
-async function authenticate(request: Request): Promise<string | null> {
-  const header = request.headers.get("authorization");
-  if (!header?.startsWith("Bearer ")) return null;
-
-  const token = header.slice(7);
-  const result = await db
-    .select()
-    .from(walletSessions)
-    .where(eq(walletSessions.token, token))
-    .limit(1);
-
-  if (result.length === 0) return null;
-
-  const session = result[0];
-  if (new Date() > session.expiresAt) return null;
-
-  return session.email;
-}

@@ -2,11 +2,14 @@ import { defineCommand } from "citty";
 import { text, isCancel, cancel, log } from "@clack/prompts";
 import pc from "picocolors";
 import { Effect } from "effect";
+import { z } from "zod";
 import { runApp } from "#/lib/run.js";
 import { OutputService } from "#/services/output.js";
 import { AuthService } from "#/services/auth.js";
 import { SessionService } from "#/services/session.js";
 import { WalletClientService } from "#/services/wallet-client.js";
+import { networkArg, formatArg, parseNetwork, parseFormat } from "#/lib/args.js";
+import { emailSchema } from "#/domain/validators.js";
 
 export const walletLogin = defineCommand({
   meta: {
@@ -20,31 +23,58 @@ export const walletLogin = defineCommand({
       description: "Your email address",
       required: true,
     },
-    network: {
-      type: "string",
-      default: "testnet",
-      alias: ["n"],
-      description: "Stellar network (testnet or pubnet)",
-    },
+    network: networkArg,
+    format: formatArg,
   },
   async run({ args }) {
     const email = args.email as string;
-    const rawNetwork = (args.network ?? "testnet") as string;
-
-    if (rawNetwork !== "testnet" && rawNetwork !== "pubnet") {
-      console.log(
-        JSON.stringify(
-          { ok: false, error: "Invalid network. Must be 'testnet' or 'pubnet'." },
-          null,
-          2,
-        ),
-      );
+    let network: "testnet" | "pubnet";
+    let format: "json" | "text";
+    try {
+      network = parseNetwork((args.network ?? "testnet") as string);
+      format = parseFormat(args.format as string);
+      emailSchema.parse(email);
+    } catch (e: unknown) {
+      if (e instanceof z.ZodError) {
+        console.log(
+          JSON.stringify(
+            {
+              ok: false,
+              error: e.issues.map((err: { message: string }) => err.message).join(", "),
+            },
+            null,
+            2,
+          ),
+        );
+      } else {
+        console.log(
+          JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }, null, 2),
+        );
+      }
       return;
     }
 
-    const network = rawNetwork;
-
     log.message(pc.cyan(`Sending OTP to ${email}...`));
+
+    const requestProgram = Effect.gen(function* () {
+      const auth = yield* AuthService;
+      return yield* auth.requestOtp(email);
+    }).pipe(
+      Effect.catchTags({
+        AuthRequestError: () =>
+          Effect.gen(function* () {
+            const output = yield* OutputService;
+            log.warn(pc.yellow("Auth API unavailable. Please try again later."));
+            yield* output.print(output.err("Could not reach auth server."));
+            return null;
+          }),
+      }),
+    );
+
+    const otpResponse = await runApp(requestProgram, "wallet login request", format);
+    if (!otpResponse || !otpResponse.ok) return;
+
+    log.success(otpResponse.message);
 
     const otpInput = await text({
       message: `Enter the OTP sent to ${email}`,
@@ -61,14 +91,11 @@ export const walletLogin = defineCommand({
 
     const otp = otpInput as string;
 
-    const program = Effect.gen(function* () {
+    const verifyAndCreateProgram = Effect.gen(function* () {
       const output = yield* OutputService;
       const auth = yield* AuthService;
       const session = yield* SessionService;
       const walletClient = yield* WalletClientService;
-
-      const otpResponse = yield* auth.requestOtp(email);
-      log.success(otpResponse.message);
 
       const verifyResponse = yield* auth.verifyOtp(email, otp);
       if (!verifyResponse.verified) {
@@ -93,12 +120,6 @@ export const walletLogin = defineCommand({
       yield* output.print(output.ok({ wallet }));
     }).pipe(
       Effect.catchTags({
-        AuthRequestError: () =>
-          Effect.gen(function* () {
-            const output = yield* OutputService;
-            log.warn(pc.yellow("Auth API unavailable. Please try again later."));
-            yield* output.print(output.err("Could not reach auth server."));
-          }),
         OtpVerifyError: () =>
           Effect.gen(function* () {
             const output = yield* OutputService;
@@ -122,6 +143,6 @@ export const walletLogin = defineCommand({
       }),
     );
 
-    await runApp(program, "wallet login");
+    await runApp(verifyAndCreateProgram, "wallet login verify", format);
   },
 });

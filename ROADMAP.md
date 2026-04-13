@@ -158,16 +158,17 @@ New domain errors in `domain/errors.ts`:
 
 > Extract reusable parts, add quality-of-life features, make everything production-ready.
 
-- [ ] Extract `packages/sdk/` (`@stecli/sdk`) — shared types, Horizon client, wallet helpers
-- [ ] Add `--format json|text` flag to all commands (default: json, text for human-readable tables)
-- [ ] Add `--network testnet|pubnet` global flag (default: testnet) — wired through the Effect layer
-- [ ] Add audit logging: `~/.stecli/audit.jsonl` with command, duration, redacted args
-- [ ] Add input validation with zod schemas for all command args
-- [ ] Better error messages: unfunded accounts, insufficient balance, network timeouts
-- [ ] Real OTP email delivery (replace placeholder)
+- [x] ~~Extract `packages/sdk/` (`@stecli/sdk`)~~ — Kept simple, no extraction needed
+- [x] Add `--format json|text` flag to all commands (default: json, text for human-readable tables)
+- [x] Add `--network testnet|pubnet` global flag (default: testnet) — wired through the Effect layer
+- [x] Add audit logging: `~/.stecli/audit.jsonl` with command, duration, redacted args
+- [x] Add input validation with zod schemas for all command args
+- [x] Better error messages: unfunded accounts, insufficient balance, network timeouts
+- [x] Real OTP email delivery (Resend + React Email with DB-backed OTP codes)
+- [x] Extract duplicate code from API routes: `authenticate()` → `lib/server/auth.ts`, `encryptSecretKey`/`decryptSecretKey` → `lib/server/crypto.ts`
 - [ ] Integration tests against Horizon testnet
 
-**Milestone:** `@stecli/sdk` is importable by other projects. Commands are stable, validated, and well-documented.
+**Milestone:** Commands are stable, validated, and production-ready. No SDK package — keeping it simple.
 
 ---
 

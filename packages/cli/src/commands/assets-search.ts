@@ -1,18 +1,17 @@
 import { defineCommand } from "citty";
 import { Effect } from "effect";
+import { z } from "zod";
 import { runApp } from "#/lib/run.js";
 import { OutputService } from "#/services/output.js";
 import { HorizonService } from "#/services/horizon.js";
+import { networkArg, formatArg, parseNetwork, parseFormat } from "#/lib/args.js";
+import { limitSchema } from "#/domain/validators.js";
 
 export const assetsSearch = defineCommand({
   meta: { name: "search", description: "Search for assets on Stellar" },
   args: {
-    network: {
-      type: "string",
-      alias: ["n"],
-      description: "Network: testnet or pubnet",
-      default: "testnet",
-    },
+    network: networkArg,
+    format: formatArg,
     code: {
       type: "string",
       alias: ["c"],
@@ -31,15 +30,29 @@ export const assetsSearch = defineCommand({
     },
   },
   async run({ args }) {
-    const network = args.network as "testnet" | "pubnet";
-    if (network !== "testnet" && network !== "pubnet") {
-      console.log(
-        JSON.stringify(
-          { ok: false, error: "Invalid network. Must be 'testnet' or 'pubnet'." },
-          null,
-          2,
-        ),
-      );
+    let network: "testnet" | "pubnet";
+    let format: "json" | "text";
+    try {
+      network = parseNetwork(args.network as string);
+      format = parseFormat(args.format as string);
+      limitSchema.parse(args.limit as string);
+    } catch (e: unknown) {
+      if (e instanceof z.ZodError) {
+        console.log(
+          JSON.stringify(
+            {
+              ok: false,
+              error: e.issues.map((err: { message: string }) => err.message).join(", "),
+            },
+            null,
+            2,
+          ),
+        );
+      } else {
+        console.log(
+          JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }, null, 2),
+        );
+      }
       return;
     }
     const program = Effect.gen(function* () {
@@ -59,6 +72,6 @@ export const assetsSearch = defineCommand({
         }),
       ),
     );
-    await runApp(program, "assets search");
+    await runApp(program, "assets search", format);
   },
 });

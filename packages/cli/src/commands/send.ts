@@ -1,10 +1,13 @@
 import { defineCommand } from "citty";
 import { confirm, isCancel, cancel } from "@clack/prompts";
 import { Effect } from "effect";
+import { z } from "zod";
 import { runApp } from "#/lib/run.js";
 import { OutputService } from "#/services/output.js";
 import { WalletClientService } from "#/services/wallet-client.js";
 import { StellarService } from "#/services/stellar.js";
+import { networkArg, formatArg, parseNetwork, parseFormat } from "#/lib/args.js";
+import { stellarPublicKey, amountSchema, assetSchema, memoSchema } from "#/domain/validators.js";
 import type { Network } from "#/domain/types.js";
 
 export const sendCommand = defineCommand({
@@ -31,23 +34,38 @@ export const sendCommand = defineCommand({
       alias: ["m"],
       description: "Transaction memo (optional)",
     },
-    network: {
-      type: "string",
-      alias: ["n"],
-      description: "Network: testnet or pubnet",
-      default: "testnet",
-    },
+    network: networkArg,
+    format: formatArg,
   },
   async run({ args }) {
-    const network = args.network as Network;
-    if (network !== "testnet" && network !== "pubnet") {
-      console.log(
-        JSON.stringify(
-          { ok: false, error: "Invalid network. Must be 'testnet' or 'pubnet'." },
-          null,
-          2,
-        ),
-      );
+    let network: Network;
+    let format: "json" | "text";
+    try {
+      network = parseNetwork(args.network as string);
+      format = parseFormat(args.format as string);
+      stellarPublicKey.parse(args.destination as string);
+      amountSchema.parse(args.amount as string);
+      assetSchema.parse(args.asset as string);
+      if (args.memo !== undefined) {
+        memoSchema.parse(args.memo as string);
+      }
+    } catch (e: unknown) {
+      if (e instanceof z.ZodError) {
+        console.log(
+          JSON.stringify(
+            {
+              ok: false,
+              error: e.issues.map((err: { message: string }) => err.message).join(", "),
+            },
+            null,
+            2,
+          ),
+        );
+      } else {
+        console.log(
+          JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }, null, 2),
+        );
+      }
       return;
     }
 
@@ -99,8 +117,35 @@ export const sendCommand = defineCommand({
             const output = yield* OutputService;
             yield* output.print(output.err(`Transaction failed: ${e.cause}`));
           }),
+        UnfundedAccountError: (e) =>
+          Effect.gen(function* () {
+            const output = yield* OutputService;
+            yield* output.print(
+              output.err(
+                `Source account ${e.address.slice(0, 8)}... is not funded on ${network}. Send at least 1 XLM to activate it.`,
+              ),
+            );
+          }),
+        InsufficientBalanceError: (e) =>
+          Effect.gen(function* () {
+            const output = yield* OutputService;
+            yield* output.print(
+              output.err(
+                `Insufficient balance. You need at least ${e.required} ${e.asset} but only have ${e.available}. Account may also need reserve balance.`,
+              ),
+            );
+          }),
+        NetworkTimeoutError: (e) =>
+          Effect.gen(function* () {
+            const output = yield* OutputService;
+            yield* output.print(
+              output.err(
+                `Network error: Could not reach Horizon. Check your connection. (${e.cause})`,
+              ),
+            );
+          }),
       }),
     );
-    await runApp(program, "send");
+    await runApp(program, "send", format);
   },
 });

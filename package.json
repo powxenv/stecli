@@ -12,6 +12,10 @@
     "dev": "vp run website#dev",
     "prepare": "vp config"
   },
+  "dependencies": {
+    "cli": "^1.0.1",
+    "zod": "^4.3.6"
+  },
   "devDependencies": {
     "vite-plus": "^0.1.16"
   },

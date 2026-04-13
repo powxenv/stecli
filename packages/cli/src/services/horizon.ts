@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { Horizon } from "@stellar/stellar-sdk";
-import { HorizonError } from "#/domain/errors.js";
+import { HorizonError, UnfundedAccountError, NetworkTimeoutError } from "#/domain/errors.js";
 import type {
   Network,
   PaginationOpts,
@@ -24,6 +24,34 @@ function horizonServer(network: Network): Horizon.Server {
   return new Horizon.Server(HORIZON_URLS[network]);
 }
 
+function isNotFoundError(e: unknown): boolean {
+  const message = e instanceof Error ? e.message : String(e);
+  if (message.includes("404") || message.includes("not found") || message.includes("Not Found"))
+    return true;
+  if (typeof e === "object" && e !== null && "response" in e) {
+    const resp = (e as { response?: { status?: number } }).response;
+    if (resp?.status === 404) return true;
+  }
+  return false;
+}
+
+function isTimeoutError(e: unknown): boolean {
+  const message = e instanceof Error ? e.message : String(e);
+  return (
+    message.includes("ECONNREFUSED") ||
+    message.includes("ETIMEDOUT") ||
+    message.includes("fetch failed") ||
+    message.includes("timeout")
+  );
+}
+
+function classifyHorizonError(e: unknown, address?: string): Error {
+  if (address && isNotFoundError(e)) return new UnfundedAccountError({ address });
+  if (isTimeoutError(e))
+    return new NetworkTimeoutError({ cause: e instanceof Error ? e.message : String(e) });
+  return new HorizonError({ cause: e instanceof Error ? e.message : String(e) });
+}
+
 function withPagination<
   T extends { cursor(c: string): T; limit(l: number): T; order(o: string): T },
 >(builder: T, opts?: PaginationOpts): T {
@@ -40,7 +68,7 @@ export class HorizonService extends Context.Tag("HorizonService")<
     readonly getAccountDetails: (
       publicKey: string,
       network: Network,
-    ) => Effect.Effect<AccountDetails, HorizonError>;
+    ) => Effect.Effect<AccountDetails, HorizonError | UnfundedAccountError | NetworkTimeoutError>;
     readonly getTransactions: (
       publicKey: string,
       network: Network,
@@ -108,7 +136,12 @@ export const HorizonLive = Layer.succeed(HorizonService, {
     Effect.tryPromise({
       try: async () => {
         const server = horizonServer(network);
-        const account = await server.loadAccount(publicKey);
+        let account: Awaited<ReturnType<typeof server.loadAccount>>;
+        try {
+          account = await server.loadAccount(publicKey);
+        } catch (e: unknown) {
+          throw classifyHorizonError(e, publicKey);
+        }
         return {
           id: account.id,
           accountId: account.account_id,
@@ -147,8 +180,10 @@ export const HorizonLive = Layer.succeed(HorizonService, {
           lastModifiedTime: account.last_modified_time,
         } satisfies AccountDetails;
       },
-      catch: (e: unknown) =>
-        new HorizonError({ cause: e instanceof Error ? e.message : String(e) }),
+      catch: (e: unknown) => {
+        if (e instanceof UnfundedAccountError || e instanceof NetworkTimeoutError) return e;
+        return new HorizonError({ cause: e instanceof Error ? e.message : String(e) });
+      },
     }),
 
   getTransactions: (publicKey: string, network: Network, opts?: PaginationOpts) =>

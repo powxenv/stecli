@@ -1,7 +1,10 @@
 import { defineCommand } from "citty";
 import { Effect } from "effect";
+import { z } from "zod";
 import { runApp } from "#/lib/run.js";
 import { HorizonService } from "#/services/horizon.js";
+import { networkArg, formatArg, parseNetwork, parseFormat } from "#/lib/args.js";
+import { stellarPublicKey } from "#/domain/validators.js";
 import type { Network } from "#/domain/types.js";
 
 export const monitorTransactions = defineCommand({
@@ -12,12 +15,8 @@ export const monitorTransactions = defineCommand({
       description: "Stellar public key (G...)",
       required: true,
     },
-    network: {
-      type: "string",
-      alias: ["n"],
-      description: "Network: testnet or pubnet",
-      default: "testnet",
-    },
+    network: networkArg,
+    format: formatArg,
     cursor: {
       type: "string",
       alias: ["c"],
@@ -26,15 +25,29 @@ export const monitorTransactions = defineCommand({
     },
   },
   async run({ args }) {
-    const network = args.network as Network;
-    if (network !== "testnet" && network !== "pubnet") {
-      console.log(
-        JSON.stringify(
-          { ok: false, error: "Invalid network. Must be 'testnet' or 'pubnet'." },
-          null,
-          2,
-        ),
-      );
+    let network: Network;
+    let format: "json" | "text";
+    try {
+      network = parseNetwork(args.network as string);
+      format = parseFormat(args.format as string);
+      stellarPublicKey.parse(args.address as string);
+    } catch (e: unknown) {
+      if (e instanceof z.ZodError) {
+        console.log(
+          JSON.stringify(
+            {
+              ok: false,
+              error: e.issues.map((err: { message: string }) => err.message).join(", "),
+            },
+            null,
+            2,
+          ),
+        );
+      } else {
+        console.log(
+          JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }, null, 2),
+        );
+      }
       return;
     }
 
@@ -57,6 +70,7 @@ export const monitorTransactions = defineCommand({
         );
       }),
       "monitor transactions",
+      format,
     );
 
     console.log(

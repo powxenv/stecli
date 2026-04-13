@@ -33,7 +33,6 @@ export interface SessionData {
 
 export interface OtpResponse {
   readonly ok: boolean;
-  readonly flowId: string;
   readonly message: string;
 }
 

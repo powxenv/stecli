@@ -5,10 +5,20 @@ import type { WalletInfo } from "#/domain/types.js";
 
 const API_BASE_URL = process.env.STECLI_API_URL ?? "https://stecli.dev";
 
+export interface WalletAddress {
+  readonly publicKey: string;
+  readonly network: string;
+  readonly email: string;
+}
+
 export class WalletClientService extends Context.Tag("WalletClientService")<
   WalletClientService,
   {
     readonly fetchWallet: () => Effect.Effect<WalletInfo, WalletNotFoundError | WalletFetchError>;
+    readonly fetchAddress: () => Effect.Effect<
+      WalletAddress,
+      WalletNotFoundError | WalletFetchError
+    >;
     readonly createWallet: (
       network: string,
     ) => Effect.Effect<WalletInfo, WalletNotFoundError | WalletCreateError>;
@@ -35,6 +45,22 @@ export const WalletClientLive = Layer.effect(
             catch: (e: unknown) => new WalletFetchError({ cause: String(e) }),
           });
           return response.wallet;
+        }),
+
+      fetchAddress: () =>
+        Effect.gen(function* () {
+          const s = yield* session.load().pipe(Effect.mapError(() => new WalletNotFoundError()));
+          const response = yield* Effect.tryPromise({
+            try: () =>
+              fetch(`${API_BASE_URL}/api/cli/wallet/address`, {
+                headers: { authorization: `Bearer ${s.token}` },
+              }).then((r) => {
+                if (!r.ok) throw new Error(`${r.status}`);
+                return r.json() as Promise<{ ok: boolean; address: WalletAddress }>;
+              }),
+            catch: (e: unknown) => new WalletFetchError({ cause: String(e) }),
+          });
+          return response.address;
         }),
 
       createWallet: (network: string) =>

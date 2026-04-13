@@ -3,26 +3,23 @@ import { Effect } from "effect";
 import { runApp } from "#/lib/run.js";
 import { OutputService } from "#/services/output.js";
 import { HorizonService } from "#/services/horizon.js";
+import { networkArg, formatArg, parseNetwork, parseFormat } from "#/lib/args.js";
 
 export const feeCommand = defineCommand({
   meta: { name: "fee", description: "Show current fee statistics from Horizon" },
   args: {
-    network: {
-      type: "string",
-      alias: ["n"],
-      description: "Network: testnet or pubnet",
-      default: "testnet",
-    },
+    network: networkArg,
+    format: formatArg,
   },
   async run({ args }) {
-    const network = args.network as "testnet" | "pubnet";
-    if (network !== "testnet" && network !== "pubnet") {
+    let network: "testnet" | "pubnet";
+    let format: "json" | "text";
+    try {
+      network = parseNetwork(args.network as string);
+      format = parseFormat(args.format as string);
+    } catch (e: unknown) {
       console.log(
-        JSON.stringify(
-          { ok: false, error: "Invalid network. Must be 'testnet' or 'pubnet'." },
-          null,
-          2,
-        ),
+        JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }, null, 2),
       );
       return;
     }
@@ -39,6 +36,6 @@ export const feeCommand = defineCommand({
         }),
       ),
     );
-    await runApp(program, "fee");
+    await runApp(program, "fee", format);
   },
 });

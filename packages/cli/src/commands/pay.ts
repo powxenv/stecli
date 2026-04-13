@@ -1,8 +1,11 @@
 import { defineCommand } from "citty";
 import { Effect } from "effect";
+import { z } from "zod";
 import { runApp } from "#/lib/run.js";
 import { OutputService } from "#/services/output.js";
 import { PaymentService } from "#/services/payment.js";
+import { formatArg, parseFormat } from "#/lib/args.js";
+import { urlSchema } from "#/domain/validators.js";
 
 export const payCommand = defineCommand({
   meta: {
@@ -15,8 +18,32 @@ export const payCommand = defineCommand({
       description: "URL to pay for",
       required: true,
     },
+    format: formatArg,
   },
   async run({ args }) {
+    let format: "json" | "text";
+    try {
+      format = parseFormat(args.format as string);
+      urlSchema.parse(args.url as string);
+    } catch (e: unknown) {
+      if (e instanceof z.ZodError) {
+        console.log(
+          JSON.stringify(
+            {
+              ok: false,
+              error: e.issues.map((err: { message: string }) => err.message).join(", "),
+            },
+            null,
+            2,
+          ),
+        );
+      } else {
+        console.log(
+          JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }, null, 2),
+        );
+      }
+      return;
+    }
     const program = Effect.gen(function* () {
       const output = yield* OutputService;
       const payment = yield* PaymentService;
@@ -49,6 +76,6 @@ export const payCommand = defineCommand({
       }),
     );
 
-    await runApp(program, "pay");
+    await runApp(program, "pay", format);
   },
 });

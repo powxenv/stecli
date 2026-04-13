@@ -56,3 +56,17 @@ export class HorizonError extends Data.TaggedError("HorizonError")<{
 export class AuditError extends Data.TaggedError("AuditError")<{
   readonly cause: string;
 }> {}
+
+export class UnfundedAccountError extends Data.TaggedError("UnfundedAccountError")<{
+  readonly address: string;
+}> {}
+
+export class InsufficientBalanceError extends Data.TaggedError("InsufficientBalanceError")<{
+  readonly available: string;
+  readonly required: string;
+  readonly asset: string;
+}> {}
+
+export class NetworkTimeoutError extends Data.TaggedError("NetworkTimeoutError")<{
+  readonly cause: string;
+}> {}
