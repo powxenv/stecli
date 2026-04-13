@@ -11,6 +11,12 @@
       "url": "https://github.com/openai/skills.git",
       "branch": "main",
       "commit": "0ed2046f287a92b5f4bcace213dcb3cc5f094cb9"
+    },
+    "skill:agentmail-cli": {
+      "name": "agentmail-cli",
+      "url": "https://github.com/agentmail-to/agentmail-skills.git",
+      "branch": "main",
+      "commit": "91672dec153f59e4c30c9a5cc21cb9fd4128e169"
     }
   }
 }

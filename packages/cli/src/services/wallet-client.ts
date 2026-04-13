@@ -3,7 +3,7 @@ import { SessionService } from "#/services/session.js";
 import { WalletNotFoundError, WalletFetchError, WalletCreateError } from "#/domain/errors.js";
 import type { WalletInfo } from "#/domain/types.js";
 
-const API_BASE_URL = process.env.STECLI_API_URL ?? "https://stecli.dev";
+const API_BASE_URL = process.env.STECLI_API_URL ?? "https://stecli.noval.me";
 
 export interface WalletAddress {
   readonly publicKey: string;

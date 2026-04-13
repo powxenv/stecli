@@ -10,9 +10,8 @@ export async function runApp<A, E, R>(
   format: OutputFormat = "json",
 ): Promise<A> {
   const start = Date.now();
-  const outputLayer = makeOutputLayer(format);
-  const fullLayer = Layer.merge(outputLayer, AppLive);
-  const provided = Effect.provide(program, fullLayer) as Effect.Effect<A, E, never>;
+  const layer = format === "json" ? AppLive : Layer.provideMerge(AppLive, makeOutputLayer(format));
+  const provided = Effect.provide(program, layer) as Effect.Effect<A, E, never>;
   try {
     const result = await Effect.runPromise(provided);
     if (command) {

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Stecli"
+  short_description: "Stellar wallet, payments, X402, and on-chain queries"
+  default_prompt: "Set up my Stellar wallet"
