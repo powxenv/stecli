@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
-const AGENT_PROMPT = "Read http://stecli.noval.me/AGENTS.md, then set it up for me.";
+const AGENT_PROMPT = "Read http://stelagent.noval.me/AGENTS.md, then set it up for me.";
 
 export function GetStarted() {
   return (
@@ -16,7 +16,7 @@ export function GetStarted() {
             Any agent.
           </h2>
           <p className="text-muted text-lg leading-relaxed mb-8">
-            Stecli ships an AGENTS.md that any AI can read and act on immediately. No setup, no
+            Stelagent ships an AGENTS.md that any AI can read and act on immediately. No setup, no
             configuration. Just point your agent at it.
           </p>
           <AgentPromptBox />
@@ -33,14 +33,14 @@ export function GetStarted() {
 
           <div className="rounded-xl border border-border bg-surface p-5 mb-4">
             <code className="text-sm font-mono">
-              <span className="text-muted">$</span> <span className="text-success">npx</span> stecli
-              wallet login -e you@example.com
+              <span className="text-muted">$</span> <span className="text-success">npx</span>{" "}
+              stelagent wallet login -e you@example.com
             </code>
           </div>
           <div className="rounded-xl border border-border bg-surface p-5">
             <code className="text-sm font-mono">
-              <span className="text-muted">$</span> <span className="text-success">npx</span> stecli
-              pay https://api.example.com/premium
+              <span className="text-muted">$</span> <span className="text-success">npx</span>{" "}
+              stelagent pay https://api.example.com/premium
             </code>
           </div>
         </div>

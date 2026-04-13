@@ -1,13 +1,13 @@
 # CLI Command Reference
 
-Detailed parameter tables, output schemas, and usage examples for every stecli command.
+Detailed parameter tables, output schemas, and usage examples for every stelagent command.
 
 ## wallet login
 
 Request an OTP code be sent to an email address.
 
 ```bash
-stecli wallet login -e <email> [-n testnet|pubnet] [-f json|text]
+stelagent wallet login -e <email> [-n testnet|pubnet] [-f json|text]
 ```
 
 | Arg     | Flag | Required | Default   | Description          |
@@ -22,14 +22,14 @@ stecli wallet login -e <email> [-n testnet|pubnet] [-f json|text]
 { "ok": true, "data": { "message": "OTP sent to user@example.com" } }
 ```
 
-This command only requests the OTP. Use `stecli wallet verify` to complete authentication.
+This command only requests the OTP. Use `stelagent wallet verify` to complete authentication.
 
 ## wallet verify
 
 Verify an OTP code and create or recover a wallet.
 
 ```bash
-stecli wallet verify -e <email> -o <otp> [-n testnet|pubnet] [-f json|text]
+stelagent wallet verify -e <email> -o <otp> [-n testnet|pubnet] [-f json|text]
 ```
 
 | Arg     | Flag | Required | Default   | Description                                 |
@@ -70,7 +70,7 @@ On testnet, the account is automatically funded via Friendbot.
 Show public key, network, and email. Does NOT expose the secret key.
 
 ```bash
-stecli wallet address [-f json|text]
+stelagent wallet address [-f json|text]
 ```
 
 **Output:**
@@ -84,7 +84,7 @@ stecli wallet address [-f json|text]
 Show all asset balances for the logged-in wallet.
 
 ```bash
-stecli wallet balance [-f json|text]
+stelagent wallet balance [-f json|text]
 ```
 
 **Output:**
@@ -105,7 +105,7 @@ stecli wallet balance [-f json|text]
 Send XLM to another Stellar address.
 
 ```bash
-stecli wallet transfer -t <destination> -a <amount> [-f json|text]
+stelagent wallet transfer -t <destination> -a <amount> [-f json|text]
 ```
 
 | Arg    | Flag | Required | Default | Description                      |
@@ -128,7 +128,7 @@ stecli wallet transfer -t <destination> -a <amount> [-f json|text]
 Clear the local session.
 
 ```bash
-stecli wallet logout [-f json|text]
+stelagent wallet logout [-f json|text]
 ```
 
 **Output:**
@@ -142,7 +142,7 @@ stecli wallet logout [-f json|text]
 Make an X402 payment to a URL. Requires wallet session.
 
 ```bash
-stecli pay <url> [-f json|text]
+stelagent pay <url> [-f json|text]
 ```
 
 | Arg | Type       | Required | Description               |
@@ -166,7 +166,7 @@ stecli pay <url> [-f json|text]
 Send any asset payment.
 
 ```bash
-stecli send <destination> <amount> [-a asset] [-m memo] [-n testnet|pubnet] [-f json|text]
+stelagent send <destination> <amount> [-a asset] [-m memo] [-n testnet|pubnet] [-f json|text]
 ```
 
 | Arg         | Flag       | Required | Default   | Description               |
@@ -183,17 +183,17 @@ stecli send <destination> <amount> [-a asset] [-m memo] [-n testnet|pubnet] [-f 
 Query Stellar account data. No auth required.
 
 ```bash
-stecli account details <address> [-n testnet|pubnet] [-f json|text]
-stecli account transactions <address> [-n ...] [--limit 10] [--cursor ...] [--order desc] [-f ...]
-stecli account payments <address> [same flags]
-stecli account effects <address> [same flags]
+stelagent account details <address> [-n testnet|pubnet] [-f json|text]
+stelagent account transactions <address> [-n ...] [--limit 10] [--cursor ...] [--order desc] [-f ...]
+stelagent account payments <address> [same flags]
+stelagent account effects <address> [same flags]
 ```
 
 ## assets
 
 ```bash
-stecli assets search [-c code] [-i issuer] [-n testnet|pubnet] [--limit 10] [-f json|text]
-stecli assets orderbook -s <asset> -b <asset> [-n testnet|pubnet] [--limit 10] [-f json|text]
+stelagent assets search [-c code] [-i issuer] [-n testnet|pubnet] [--limit 10] [-f json|text]
+stelagent assets orderbook -s <asset> -b <asset> [-n testnet|pubnet] [--limit 10] [-f json|text]
 ```
 
 Asset format: `native` for XLM, or `CODE:ISSUER` for custom assets.
@@ -201,7 +201,7 @@ Asset format: `native` for XLM, or `CODE:ISSUER` for custom assets.
 ## fee
 
 ```bash
-stecli fee [-n testnet|pubnet] [-f json|text]
+stelagent fee [-n testnet|pubnet] [-f json|text]
 ```
 
 ## monitor
@@ -209,7 +209,7 @@ stecli fee [-n testnet|pubnet] [-f json|text]
 Stream real-time events. Ctrl+C to stop.
 
 ```bash
-stecli monitor transactions <address> [-n testnet|pubnet] [--cursor now] [-f json|text]
-stecli monitor payments <address> [same flags]
-stecli monitor effects <address> [same flags]
+stelagent monitor transactions <address> [-n testnet|pubnet] [--cursor now] [-f json|text]
+stelagent monitor payments <address> [same flags]
+stelagent monitor effects <address> [same flags]
 ```

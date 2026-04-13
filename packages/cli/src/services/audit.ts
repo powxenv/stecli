@@ -2,8 +2,8 @@ import { writeFileSync, mkdirSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 
-const STECLI_DIR = join(homedir(), ".stecli");
-const AUDIT_FILE = join(STECLI_DIR, "audit.jsonl");
+const STELAGENT_DIR = join(homedir(), ".stelagent");
+const AUDIT_FILE = join(STELAGENT_DIR, "audit.jsonl");
 const MAX_LINES = 10000;
 const KEEP_LINES = 5000;
 
@@ -38,7 +38,7 @@ export function writeAuditEntry(entry: {
   readonly args?: ReadonlyArray<string>;
 }): void {
   try {
-    if (!existsSync(STECLI_DIR)) mkdirSync(STECLI_DIR, { recursive: true });
+    if (!existsSync(STELAGENT_DIR)) mkdirSync(STELAGENT_DIR, { recursive: true });
     rotateIfNeeded();
     const line = JSON.stringify({
       ts: new Date().toISOString(),

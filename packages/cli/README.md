@@ -1,11 +1,11 @@
-# @stecli/cli
+# @stelagent/cli
 
 Modular, agent-first CLI for Stellar — wallet, payments, markets, and DeFi.
 
 ## Quick Start
 
 ```bash
-npx @stecli/cli wallet login -e you@example.com
+npx @stelagent/cli wallet login -e you@example.com
 ```
 
 Prompts for an OTP sent to your email, then creates or recovers your Stellar wallet.
@@ -13,7 +13,7 @@ Prompts for an OTP sent to your email, then creates or recovers your Stellar wal
 ## Usage
 
 ```bash
-stecli <command> [options]
+stelagent <command> [options]
 ```
 
 ### `wallet login`
@@ -21,8 +21,8 @@ stecli <command> [options]
 Sign in with email to create or recover your wallet.
 
 ```bash
-stecli wallet login -e you@example.com
-stecli wallet login -e you@example.com -n testnet
+stelagent wallet login -e you@example.com
+stelagent wallet login -e you@example.com -n testnet
 ```
 
 | Flag            | Description                                |
@@ -37,7 +37,7 @@ One email always maps to one wallet. Logging in from any device with the same em
 Show the wallet public key.
 
 ```bash
-stecli wallet address
+stelagent wallet address
 ```
 
 ### `wallet balance`
@@ -45,7 +45,7 @@ stecli wallet address
 Show token balances.
 
 ```bash
-stecli wallet balance
+stelagent wallet balance
 ```
 
 ### `wallet transfer`
@@ -53,7 +53,7 @@ stecli wallet balance
 Send XLM to another Stellar address.
 
 ```bash
-stecli wallet transfer -t GDXXX... -a 10
+stelagent wallet transfer -t GDXXX... -a 10
 ```
 
 | Flag           | Description                       |
@@ -66,7 +66,7 @@ stecli wallet transfer -t GDXXX... -a 10
 Clear the local session.
 
 ```bash
-stecli wallet logout
+stelagent wallet logout
 ```
 
 ### `pay <url>`
@@ -74,7 +74,7 @@ stecli wallet logout
 Make an x402 payment to access a paywalled resource.
 
 ```bash
-stecli pay https://api.example.com/premium
+stelagent pay https://api.example.com/premium
 ```
 
 If the URL returns HTTP 402, the CLI negotiates payment using the x402 protocol and retries with a signed payment header.
@@ -93,12 +93,12 @@ All commands output structured JSON:
 
 ## Architecture
 
-Wallets are stored server-side — one wallet per email, recoverable from any device. The CLI only holds a session token locally (`~/.stecli/session.json`). Secret keys are fetched from the server over HTTPS on each command invocation and never persisted to disk.
+Wallets are stored server-side — one wallet per email, recoverable from any device. The CLI only holds a session token locally (`~/.stelagent/session.json`). Secret keys are fetched from the server over HTTPS on each command invocation and never persisted to disk.
 
 ## Development
 
 ```bash
 bun install
-vp run @stecli/cli#build
+vp run @stelagent/cli#build
 bun packages/cli/src/index.ts --help
 ```

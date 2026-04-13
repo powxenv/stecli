@@ -34,7 +34,7 @@ export const Route = createFileRoute("/api/cli/auth/otp/request")({
         const html = await render(createElement(OtpEmail, { otp: code, email }));
 
         const { error } = await resend.emails.send({
-          from: "Stecli <send@mail.stecli.noval.me>",
+          from: "Stelagent <send@mail.stelagent.noval.me>",
           to: [email],
           subject: `Your verification code is ${code}`,
           html,

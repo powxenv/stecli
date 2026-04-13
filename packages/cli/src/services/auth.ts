@@ -2,7 +2,7 @@ import { Result } from "better-result";
 import { AuthRequestError, OtpVerifyError } from "#/domain/errors.js";
 import type { OtpResponse, VerifyResponse, AuthResult } from "#/domain/types.js";
 
-const API_BASE_URL = process.env.STECLI_API_URL ?? "https://stecli.noval.me";
+const API_BASE_URL = process.env.STELAGENT_API_URL ?? "https://stelagent.noval.me";
 
 export function requestOtp(email: string): Promise<AuthResult<OtpResponse>> {
   return Result.tryPromise({

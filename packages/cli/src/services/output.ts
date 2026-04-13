@@ -52,7 +52,7 @@ export function formatWalletError(err: WalletError): string {
   return matchErrorPartial(
     err,
     {
-      WalletNotFoundError: () => "No wallet found. Run `stecli wallet login` first.",
+      WalletNotFoundError: () => "No wallet found. Run `stelagent wallet login` first.",
       WalletFetchError: (e) => `Failed to fetch wallet: ${e.cause}`,
       WalletCreateError: (e) => `Failed to create wallet: ${e.cause}`,
     },

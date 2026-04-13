@@ -1,9 +1,9 @@
 {
-  "short_name": "SteCLI",
-  "name": "SteCLI",
+  "short_name": "STELAGENT",
+  "name": "STELAGENT",
   "icons": [
     {
-      "src": "stecli-favicon.svg",
+      "src": "stelagent-favicon.svg",
       "type": "image/svg+xml",
       "sizes": "any"
     },

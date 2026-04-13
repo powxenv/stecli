@@ -68,10 +68,10 @@
       },
     },
     "packages/cli": {
-      "name": "stecli",
+      "name": "stelagent",
       "version": "0.1.0",
       "bin": {
-        "stecli": "./dist/index.mjs",
+        "stelagent": "./dist/index.mjs",
       },
       "dependencies": {
         "@clack/prompts": "^1.2.0",
@@ -2086,7 +2086,7 @@
 
     "stdin-discarder": ["stdin-discarder@0.2.2", "", {}, "sha512-UhDfHmA92YAlNnCfhmq0VeNL5bDbiZGg7sZ2IvPsXubGkiNa9EC+tUTsjBRsYUAz87btI6/1wf4XoVvQ3uRnmQ=="],
 
-    "stecli": ["stecli@workspace:packages/cli"],
+    "stelagent": ["stelagent@workspace:packages/cli"],
 
     "string-width": ["string-width@7.2.0", "", { "dependencies": { "emoji-regex": "^10.3.0", "get-east-asian-width": "^1.0.0", "strip-ansi": "^7.1.0" } }, "sha512-tsaTIkKW9b4N+AEj+SVA+WhJzV7/zMhcSu78mLKWSk7cXMOSHsBKFWUs0fWwq8QyK3MgJBQRX6Gbi4kYbdvGkQ=="],
 

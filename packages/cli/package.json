@@ -1,10 +1,10 @@
 {
-  "name": "stecli",
-  "version": "0.1.0",
+  "name": "stelagent",
+  "version": "0.0.1",
   "description": "Modular, agent-first CLI for Stellar — wallet, payments, markets, and DeFi",
   "license": "MIT",
   "bin": {
-    "stecli": "./dist/index.mjs"
+    "stelagent": "./dist/index.mjs"
   },
   "files": [
     "dist"

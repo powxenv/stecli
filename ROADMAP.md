@@ -1,14 +1,14 @@
-# Stecli Roadmap
+# Stelagent Roadmap
 
 ## Current Focus
 
 Build a solid Horizon API wrapper and complete the essential CLI commands. No skills, no MCP, no self-upgrade — just a clean, type-safe command surface that works.
 
-### Running stecli
+### Running stelagent
 
 ```bash
-npx stecli <command>
-bunx stecli <command>
+npx stelagent <command>
+bunx stelagent <command>
 ```
 
 No install, no upgrade command. Always runs the latest published version.
@@ -20,8 +20,8 @@ No install, no upgrade command. Always runs the latest published version.
 | Item                                    | Reason                                          | Revisit |
 | --------------------------------------- | ----------------------------------------------- | ------- |
 | Skills (`skills/` SKILL.md definitions) | Needs stable command surface first              | Phase 4 |
-| MCP server (`stecli mcp`)               | Needs all commands and services finalized first | Phase 4 |
-| Self-upgrade (`stecli upgrade`)         | `npx`/`bunx` handles this for free              | Never   |
+| MCP server (`stelagent mcp`)            | Needs all commands and services finalized first | Phase 4 |
+| Self-upgrade (`stelagent upgrade`)      | `npx`/`bunx` handles this for free              | Never   |
 | Soroban smart contract interaction      | Advanced feature, not essential for core loop   | Phase 4 |
 | Website dashboard (`/dashboard` routes) | CLI is the priority                             | Phase 5 |
 | Real OTP email delivery                 | Placeholder is fine for now                     | Phase 3 |
@@ -35,9 +35,9 @@ These items from the original Phase 1 are resolved:
 - [x] API routes import from `#/db/index.ts` (not the missing `#/db/server.ts`)
 - [x] `db/index.ts` exports a Drizzle client (`drizzle(env.NEON_DATABASE_URL)`)
 - [x] Stale route files removed, `routeTree.gen.ts` regenerated with only existing routes
-- [x] CLI services use `STECLI_API_URL` env var (fallback: `https://stecli.dev`)
-- [x] Rebranding: `cent` → `stecli`, `centsh-agent` → `stecli`, `~/.cent/` → `~/.stecli/`
-- [x] Error messages reference `stecli wallet login`
+- [x] CLI services use `STELAGENT_API_URL` env var (fallback: `https://stelagent.dev`)
+- [x] Rebranding: `cent` → `stelagent`, `centsh-agent` → `stelagent`, `~/.cent/` → `~/.stelagent/`
+- [x] Error messages reference `stelagent wallet login`
 
 ---
 
@@ -49,9 +49,9 @@ These items from the original Phase 1 are resolved:
   - `authenticate()` is duplicated in `wallet/index.ts` and `wallet/create.ts` → move to `apps/website/src/lib/auth.ts`
   - `decryptSecretKey()` is duplicated in `wallet/index.ts` and `wallet/create.ts` → move to `apps/website/src/lib/crypto.ts`
   - `encryptSecretKey()` is only in `wallet/create.ts` → also move to `apps/website/src/lib/crypto.ts`
-- [ ] Make Horizon URLs configurable via env var (`STECLI_HORIZON_TESTNET_URL`, `STECLI_HORIZON_PUBNET_URL`) instead of hardcoded constants in `services/stellar.ts`
+- [ ] Make Horizon URLs configurable via env var (`STELAGENT_HORIZON_TESTNET_URL`, `STELAGENT_HORIZON_PUBNET_URL`) instead of hardcoded constants in `services/stellar.ts`
 - [ ] Add a global `--network` flag (default: `testnet`) to the CLI root command, so every command can accept it without repeating the option
-- [ ] Verify full E2E flow: `stecli wallet login` → `stecli wallet balance` → `stecli wallet transfer`
+- [ ] Verify full E2E flow: `stelagent wallet login` → `stelagent wallet balance` → `stelagent wallet transfer`
 
 **Milestone:** Existing wallet commands work against a local dev server with no hardcoded URLs or duplicated logic.
 
@@ -59,7 +59,7 @@ These items from the original Phase 1 are resolved:
 
 ## Phase 2 — Horizon API Wrapper + New Commands
 
-> Wrap Horizon REST + SSE in typed services. Add the commands that make stecli genuinely useful.
+> Wrap Horizon REST + SSE in typed services. Add the commands that make stelagent genuinely useful.
 
 ### Services to add
 
@@ -70,13 +70,13 @@ These items from the original Phase 1 are resolved:
 
 ### New commands
 
-| Command          | Subcommands                                      | What it does                                                     |
-| ---------------- | ------------------------------------------------ | ---------------------------------------------------------------- |
-| `stecli account` | `details`, `transactions`, `payments`, `effects` | Read account data from Horizon                                   |
-| `stecli assets`  | `search`, `orderbook`                            | Look up assets, check markets                                    |
-| `stecli send`    | —                                                | Send XLM or custom asset payment (generalizes `wallet transfer`) |
-| `stecli fee`     | —                                                | Current fee stats from `/fee_stats`                              |
-| `stecli monitor` | `transactions`, `payments`, `effects`            | Stream live data via SSE                                         |
+| Command             | Subcommands                                      | What it does                                                     |
+| ------------------- | ------------------------------------------------ | ---------------------------------------------------------------- |
+| `stelagent account` | `details`, `transactions`, `payments`, `effects` | Read account data from Horizon                                   |
+| `stelagent assets`  | `search`, `orderbook`                            | Look up assets, check markets                                    |
+| `stelagent send`    | —                                                | Send XLM or custom asset payment (generalizes `wallet transfer`) |
+| `stelagent fee`     | —                                                | Current fee stats from `/fee_stats`                              |
+| `stelagent monitor` | `transactions`, `payments`, `effects`            | Stream live data via SSE                                         |
 
 ### Types to add
 
@@ -92,65 +92,65 @@ New domain errors in `domain/errors.ts`:
 
 ### Command details
 
-**`stecli account details <address>`**
+**`stelagent account details <address>`**
 
 - Calls `GET /accounts/:id`
 - Output: balances, signers, thresholds, flags, subentry count, sequence number
 
-**`stecli account transactions <address>`**
+**`stelagent account transactions <address>`**
 
 - Calls `GET /accounts/:id/transactions`
 - Flags: `--limit`, `--cursor`, `--order asc|desc`
 - Output: hash, ledger, created_at, operation_count, success
 
-**`stecli account payments <address>`**
+**`stelagent account payments <address>`**
 
 - Calls `GET /accounts/:id/payments`
 - Flags: `--limit`, `--cursor`
 - Output: id, from, to, amount, asset, transaction_hash
 
-**`stecli account effects <address>`**
+**`stelagent account effects <address>`**
 
 - Calls `GET /accounts/:id/effects`
 - Flags: `--limit`, `--cursor`
 
-**`stecli assets search [--code USDC] [--issuer G...]`**
+**`stelagent assets search [--code USDC] [--issuer G...]`**
 
 - Calls `GET /assets`
 - Flags: `--code`, `--issuer`, `--limit`
 
-**`stecli assets orderbook --selling XLM --buying USDC:G...`**
+**`stelagent assets orderbook --selling XLM --buying USDC:G...`**
 
 - Calls `GET /order_book`
 - Flags: `--selling`, `--buying`, `--limit`
 
-**`stecli send <destination> <amount> [--asset native]`**
+**`stelagent send <destination> <amount> [--asset native]`**
 
 - Loads account, builds transaction, signs, submits via Horizon
 - Asset format: `native` for XLM, `CODE:ISSUER` for custom assets
 - `--memo text:...` flag for memo support
 - Confirmation prompt for amounts > 100 XLM
 
-**`stecli fee`**
+**`stelagent fee`**
 
 - Calls `GET /fee_stats`
 - Output: base_fee, min_fee, max_fee, ledger_capacity
 
-**`stecli monitor transactions <address>`**
+**`stelagent monitor transactions <address>`**
 
 - Opens SSE stream, prints each transaction as it arrives
 - `--cursor` to resume from a position
 - Ctrl+C to stop
 
-**`stecli monitor payments <address>`**
+**`stelagent monitor payments <address>`**
 
 - Same pattern, streams payments
 
-**`stecli monitor effects <address>`**
+**`stelagent monitor effects <address>`**
 
 - Same pattern, streams effects
 
-**Milestone:** All read-only Horizon commands + send payment work. `stecli account details GABC...` returns real data.
+**Milestone:** All read-only Horizon commands + send payment work. `stelagent account details GABC...` returns real data.
 
 ---
 
@@ -158,10 +158,10 @@ New domain errors in `domain/errors.ts`:
 
 > Extract reusable parts, add quality-of-life features, make everything production-ready.
 
-- [x] ~~Extract `packages/sdk/` (`@stecli/sdk`)~~ — Kept simple, no extraction needed
+- [x] ~~Extract `packages/sdk/` (`@stelagent/sdk`)~~ — Kept simple, no extraction needed
 - [x] Add `--format json|text` flag to all commands (default: json, text for human-readable tables)
 - [x] Add `--network testnet|pubnet` global flag (default: testnet) — wired through the Effect layer
-- [x] Add audit logging: `~/.stecli/audit.jsonl` with command, duration, redacted args
+- [x] Add audit logging: `~/.stelagent/audit.jsonl` with command, duration, redacted args
 - [x] Add input validation with zod schemas for all command args
 - [x] Better error messages: unfunded accounts, insufficient balance, network timeouts
 - [x] Real OTP email delivery (Resend + React Email with DB-backed OTP codes)
@@ -178,7 +178,7 @@ New domain errors in `domain/errors.ts`:
 
 - [ ] Create `skills/` directory with SKILL.md definitions for each command group
 - [ ] Add intent-routing trigger phrases to each skill's YAML frontmatter
-- [ ] Implement `stecli mcp` command using `@modelcontextprotocol/sdk`
+- [ ] Implement `stelagent mcp` command using `@modelcontextprotocol/sdk`
 - [ ] Thin adapter: MCP tools call the same service functions as CLI commands
 - [ ] Soroban contract interaction (deploy, simulate, invoke)
 - [ ] Test MCP server with Claude Code, Cursor, OpenCode
@@ -202,9 +202,9 @@ New domain errors in `domain/errors.ts`:
 ```
 Phase 1 (now)     → Fix remaining duplication, make Horizon URLs configurable, verify E2E
 Phase 2 (next)    → Horizon wrapper + account/assets/send/fee/monitor commands
-Phase 3            → @stecli/sdk extraction, audit, format flags, zod validation, real OTP
+Phase 3            → @stelagent/sdk extraction, audit, format flags, zod validation, real OTP
 Phase 4            → Skills + MCP server + Soroban
 Phase 5            → DeFi, dashboard
 ```
 
-No upgrade command. `npx stecli` always runs latest.
+No upgrade command. `npx stelagent` always runs latest.

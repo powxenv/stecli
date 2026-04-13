@@ -19,7 +19,7 @@ export const Route = createRootRoute<{
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "Stecli: Agent-First CLI for Stellar",
+        title: "Stelagent: Agent-First CLI for Stellar",
       },
     ],
     links: [
@@ -30,7 +30,7 @@ export const Route = createRootRoute<{
       {
         rel: "icon",
         type: "image/svg+xml",
-        href: "/stecli-favicon.svg",
+        href: "/stelagent-favicon.svg",
       },
       {
         rel: "icon",

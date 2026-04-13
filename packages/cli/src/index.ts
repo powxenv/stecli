@@ -9,7 +9,7 @@ import { monitorCommand } from "./commands/monitor.js";
 
 const mainCommand = defineCommand({
   meta: {
-    name: "stecli",
+    name: "stelagent",
     version: "0.1.0",
     description: "Modular, agent-first CLI for Stellar — wallet, payments, markets, and DeFi",
   },

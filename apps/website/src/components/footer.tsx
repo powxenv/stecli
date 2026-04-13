@@ -1,12 +1,12 @@
-import { StecliLogo } from "./logo";
+import { StelagentLogo } from "./logo";
 
 export function Footer() {
   return (
     <footer className="inner border-x px-8 py-8 border-t border-border">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
-          <StecliLogo className="h-5 w-5" />
-          <span className="text-sm text-muted">Stecli: Agent-first CLI for Stellar</span>
+          <StelagentLogo className="h-5 w-5" />
+          <span className="text-sm text-muted">Stelagent: Agent-first CLI for Stellar</span>
         </div>
         <div className="flex items-center gap-6 text-sm text-muted">
           <a

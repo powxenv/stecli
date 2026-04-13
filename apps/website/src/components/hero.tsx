@@ -7,13 +7,13 @@ import HugeiconsChatBot from "~icons/hugeicons/chat-bot";
 import HugeiconsTools from "~icons/hugeicons/tools";
 import HugeiconsLoading03 from "~icons/hugeicons/loading-03";
 
-const AGENT_PROMPT = "Read http://stecli.noval.me/AGENTS.md, then set it up for me.";
+const AGENT_PROMPT = "Read http://stelagent.noval.me/AGENTS.md, then set it up for me.";
 
 const CHAT_MESSAGES = [
   {
     role: "user",
     icon: HugeiconsUser,
-    text: "Read http://stecli.noval.me/AGENTS.md, then set it up for me.",
+    text: "Read http://stelagent.noval.me/AGENTS.md, then set it up for me.",
   },
   {
     role: "bot",
@@ -28,7 +28,7 @@ const CHAT_MESSAGES = [
   {
     role: "tool",
     icon: HugeiconsTools,
-    text: "Running npx stecli wallet login -e xxxxx@xxx.com",
+    text: "Running npx stelagent wallet login -e xxxxx@xxx.com",
   },
   {
     role: "bot",
@@ -43,7 +43,7 @@ const CHAT_MESSAGES = [
   {
     role: "tool",
     icon: HugeiconsTools,
-    text: "Running npx stecli wallet verify -e xxxxx@xxx.com -o 123456",
+    text: "Running npx stelagent wallet verify -e xxxxx@xxx.com -o 123456",
   },
   {
     role: "bot",
@@ -105,7 +105,7 @@ export function Hero() {
 
           <p className="text-lg md:text-xl text-muted leading-relaxed max-w-xl mb-10">
             Wallet, payments, markets, monitoring. All structured as agent skills. Point any AI at
-            Stecli and it knows what to do.
+            Stelagent and it knows what to do.
           </p>
         </div>
 

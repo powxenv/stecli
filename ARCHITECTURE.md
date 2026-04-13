@@ -1,4 +1,4 @@
-# Stecli Architecture Proposal
+# Stelagent Architecture Proposal
 
 > Modular, agent-first CLI for Stellar — combining OnchainOS's skill-based design with Stellar's Horizon ecosystem.
 
@@ -6,20 +6,20 @@
 
 ## 1. Rebranding Summary
 
-All `cent` / `centsh` / `centsh-agent` references have been updated to `stecli` / `@stecli/cli`:
+All `cent` / `centsh` / `centsh-agent` references have been updated to `stelagent` / `@stelagent/cli`:
 
 | Location            | Before                                              | After                                                                        |
 | ------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Root `package.json` | `"name": "cent"`                                    | `"name": "stecli"`                                                           |
-| CLI `package.json`  | `@centsh/agent`                                     | `@stecli/cli`                                                                |
-| CLI bin name        | `centsh-agent`                                      | `stecli`                                                                     |
-| CLI meta name       | `centsh-agent`                                      | `stecli`                                                                     |
+| Root `package.json` | `"name": "cent"`                                    | `"name": "stelagent"`                                                        |
+| CLI `package.json`  | `@centsh/agent`                                     | `@stelagent/cli`                                                             |
+| CLI bin name        | `centsh-agent`                                      | `stelagent`                                                                  |
+| CLI meta name       | `centsh-agent`                                      | `stelagent`                                                                  |
 | CLI description     | "Agentic wallet CLI for Stellar with x402 payments" | "Modular, agent-first CLI for Stellar — wallet, payments, markets, and DeFi" |
-| Session dir         | `~/.cent/`                                          | `~/.stecli/`                                                                 |
-| API base URL        | hardcoded `https://cent.dev`                        | `STECLI_API_URL` env var / `https://stecli.dev`                              |
-| Error messages      | `@centsh/agent wallet login`                        | `stecli wallet login`                                                        |
-| Website title       | "Cent — Sell Digital Products with Micropayments"   | "Stecli — Agent-First CLI for Stellar"                                       |
-| Root README         | Vite+ starter boilerplate                           | stecli project description                                                   |
+| Session dir         | `~/.cent/`                                          | `~/.stelagent/`                                                              |
+| API base URL        | hardcoded `https://cent.dev`                        | `STELAGENT_API_URL` env var / `https://stelagent.dev`                        |
+| Error messages      | `@centsh/agent wallet login`                        | `stelagent wallet login`                                                     |
+| Website title       | "Cent — Sell Digital Products with Micropayments"   | "Stelagent — Agent-First CLI for Stellar"                                    |
+| Root README         | Vite+ starter boilerplate                           | stelagent project description                                                |
 
 ---
 
@@ -143,12 +143,12 @@ The MCP server is a **thin adapter** over stdio (JSON-RPC 2.0):
 
 ---
 
-## 3. Current Stecli (Formerly Cent) Analysis
+## 3. Current Stelagent (Formerly Cent) Analysis
 
 ### 3.1 What Exists
 
 ```
-stecli/
+stelagent/
 ├── apps/website/              # TanStack Start (SSR React + API routes)
 │   └── src/
 │       ├── db/
@@ -166,7 +166,7 @@ stecli/
 │       ├── env.ts             # T3Env typed env vars
 │       └── styles.css         # HeroUI theme (light/dark oklch)
 ├── packages/                  # EMPTY
-├── packages/cli/                # @stecli/cli (was @centsh/agent)
+├── packages/cli/                # @stelagent/cli (was @centsh/agent)
 │   └── src/
 │       ├── index.ts            # Entry: citty + runMain
 │       ├── domain/
@@ -177,7 +177,7 @@ stecli/
 │       ├── services/
 │       │   ├── output.ts      # OutputService (JSON formatting)
 │       │   ├── auth.ts        # AuthService (OTP request/verify)
-│       │   ├── session.ts     # SessionService (~/.stecli/session.json)
+│       │   ├── session.ts     # SessionService (~/.stelagent/session.json)
 │       │   ├── wallet-client.ts  # WalletClientService (HTTP)
 │       │   ├── stellar.ts     # StellarService (Horizon balance + XLM transfer)
 │       │   └── payment.ts     # PaymentService (x402 protocol)
@@ -189,19 +189,19 @@ stecli/
 │           ├── wallet-transfer.ts
 │           ├── wallet-logout.ts
 │           └── pay.ts
-└── package.json               # Monorepo root ("stecli")
+└── package.json               # Monorepo root ("stelagent")
 ```
 
 ### 3.2 Functional Commands
 
-| Command                                     | Status                | Description                              |
-| ------------------------------------------- | --------------------- | ---------------------------------------- |
-| `stecli wallet login -e <email>`            | Functional (mock OTP) | OTP-based login, creates/recovers wallet |
-| `stecli wallet address`                     | Functional            | Show public key                          |
-| `stecli wallet balance`                     | Functional            | XLM + asset balances via Horizon         |
-| `stecli wallet transfer -t <addr> -a <amt>` | Functional            | Send XLM                                 |
-| `stecli wallet logout`                      | Functional            | Clear session                            |
-| `stecli pay <url>`                          | Functional            | x402 micropayment                        |
+| Command                                        | Status                | Description                              |
+| ---------------------------------------------- | --------------------- | ---------------------------------------- |
+| `stelagent wallet login -e <email>`            | Functional (mock OTP) | OTP-based login, creates/recovers wallet |
+| `stelagent wallet address`                     | Functional            | Show public key                          |
+| `stelagent wallet balance`                     | Functional            | XLM + asset balances via Horizon         |
+| `stelagent wallet transfer -t <addr> -a <amt>` | Functional            | Send XLM                                 |
+| `stelagent wallet logout`                      | Functional            | Clear session                            |
+| `stelagent pay <url>`                          | Functional            | x402 micropayment                        |
 
 ### 3.3 Critical Issues
 
@@ -221,9 +221,9 @@ stecli/
 
 ---
 
-## 4. Gap Analysis: OnchainOS vs Current Stecli
+## 4. Gap Analysis: OnchainOS vs Current Stelagent
 
-| Dimension          | OnchainOS                                                 | Current Stecli                   | Gap Severity      |
+| Dimension          | OnchainOS                                                 | Current Stelagent                | Gap Severity      |
 | ------------------ | --------------------------------------------------------- | -------------------------------- | ----------------- |
 | **Skills**         | 14 modular skill definitions (SKILL.md)                   | None                             | **Critical**      |
 | **MCP Server**     | 50+ tools over JSON-RPC stdio                             | None                             | **Critical**      |
@@ -235,7 +235,7 @@ stecli/
 | **Auto-upgrade**   | Built-in self-upgrade with semver + SHA256                | None                             | Low               |
 | **Output format**  | `{ ok, data }` / `{ ok, error }` / `{ confirming }`       | `{ ok, data }` / `{ ok, error }` | Aligned           |
 | **Chains**         | 20+ blockchains                                           | Stellar only                     | N/A (intentional) |
-| **DX install**     | `curl \| sh`, `npx skills add`                            | `npx @stecli/cli`                | Moderate          |
+| **DX install**     | `curl \| sh`, `npx skills add`                            | `npx @stelagent/cli`             | Moderate          |
 
 ### Top Priority Gaps
 
@@ -320,12 +320,12 @@ Horizon requires **no authentication** — it's a public read-only REST API. Tra
 
 ---
 
-## 6. Proposed Architecture: Stecli v2
+## 6. Proposed Architecture: Stelagent v2
 
 ### 6.1 Directory Structure
 
 ```
-stecli/
+stelagent/
 ├── apps/
 │   └── website/                     # TanStack Start (API server + dashboard)
 ├── skills/                           # Agent skill definitions (SKILL.md)
@@ -344,7 +344,7 @@ stecli/
 │   └── stellar-security/            # Security: transaction simulation, fee estimation
 │       └── SKILL.md
 ├── packages/
-│   └── sdk/                         # @stecli/sdk — shared Stellar service library
+│   └── sdk/                         # @stelagent/sdk — shared Stellar service library
 │       ├── src/
 │       │   ├── horizon.ts            # Horizon REST + SSE client
 │       │   ├── soroban.ts            # Soroban RPC client
@@ -353,7 +353,7 @@ stecli/
 │       │   └── types.ts              # Shared types
 │       └── package.json
 ├── packages/
-│   ├── cli/                         # @stecli/cli — the CLI binary
+│   ├── cli/                         # @stelagent/cli — the CLI binary
 │   │   ├── src/
 │       │   ├── index.ts              # Entry: defineCommand + runMain
 │       │   ├── domain/
@@ -364,7 +364,7 @@ stecli/
 │       │   ├── services/
 │       │   │   ├── output.ts         # OutputService (JSON formatting)
 │       │   │   ├── auth.ts           # AuthService (OTP / API key)
-│       │   │   ├── session.ts        # SessionService (~/.stecli/)
+│       │   │   ├── session.ts        # SessionService (~/.stelagent/)
 │       │   │   ├── wallet-client.ts  # WalletClientService (HTTP)
 │       │   │   ├── horizon.ts        # HorizonService (REST + SSE)
 │       │   │   ├── soroban.ts        # SorobanService (contract calls)
@@ -394,16 +394,16 @@ stecli/
 
 ### 6.2 Command Surface
 
-| Command          | Subcommands                                    | Description                 | Horizon Endpoints                                   |
-| ---------------- | ---------------------------------------------- | --------------------------- | --------------------------------------------------- |
-| `stecli wallet`  | login, address, balance, transfer, logout      | Wallet lifecycle            | `POST /transactions`                                |
-| `stecli account` | details, transactions, payments, effects, data | Account insights            | `GET /accounts/:id/*`                               |
-| `stecli assets`  | search, info, holders, markets, orderbook      | Asset analytics             | `GET /assets`, `/order_book`, `/trade_aggregations` |
-| `stecli send`    | —                                              | Send payment (XLM or asset) | `POST /transactions`                                |
-| `stecli pay`     | —                                              | x402 micropayment to URL    | N/A (x402 protocol)                                 |
-| `stecli monitor` | transactions, payments, effects, account       | SSE real-time streaming     | `GET /transactions` etc. w/ SSE                     |
-| `stecli mcp`     | —                                              | Start MCP server (stdio)    | All of the above                                    |
-| `stecli upgrade` | —                                              | Self-update CLI binary      | N/A                                                 |
+| Command             | Subcommands                                    | Description                 | Horizon Endpoints                                   |
+| ------------------- | ---------------------------------------------- | --------------------------- | --------------------------------------------------- |
+| `stelagent wallet`  | login, address, balance, transfer, logout      | Wallet lifecycle            | `POST /transactions`                                |
+| `stelagent account` | details, transactions, payments, effects, data | Account insights            | `GET /accounts/:id/*`                               |
+| `stelagent assets`  | search, info, holders, markets, orderbook      | Asset analytics             | `GET /assets`, `/order_book`, `/trade_aggregations` |
+| `stelagent send`    | —                                              | Send payment (XLM or asset) | `POST /transactions`                                |
+| `stelagent pay`     | —                                              | x402 micropayment to URL    | N/A (x402 protocol)                                 |
+| `stelagent monitor` | transactions, payments, effects, account       | SSE real-time streaming     | `GET /transactions` etc. w/ SSE                     |
+| `stelagent mcp`     | —                                              | Start MCP server (stdio)    | All of the above                                    |
+| `stelagent upgrade` | —                                              | Self-update CLI binary      | N/A                                                 |
 
 ### 6.3 Skill Definition (SKILL.md) Format
 
@@ -420,15 +420,15 @@ description: >
   Trigger phrases: "check account", "account details", "what happened",
   "transaction history", "recent payments", "account data entries"
 metadata:
-  author: stecli
+  author: stelagent
   version: "0.1.0"
-  homepage: "https://stecli.dev"
+  homepage: "https://stelagent.dev"
 ---
 ```
 
 Each SKILL.md includes:
 
-1. **Command Index** — Table of `stecli` commands with descriptions and flags
+1. **Command Index** — Table of `stelagent` commands with descriptions and flags
 2. **Pre-flight Checks** — Session validation, network selection
 3. **Network Selection** — `--network testnet|pubnet` (default: testnet)
 4. **Operation Flow** — Step-by-step instructions per use case
@@ -438,10 +438,10 @@ Each SKILL.md includes:
 8. **Cross-skill Workflows** —
 
 ```
-Search and Buy:  stellar-assets (find asset) → stellar-account (check balance) → stecli send (execute payment)
+Search and Buy:  stellar-assets (find asset) → stellar-account (check balance) → stelagent send (execute payment)
 Portfolio Check:  stellar-account (account details) → stellar-assets (enrich with market data)
 Monitor Activity:  stellar-monitor (stream SSE) → stellar-account (enrich effects)
-x402 Payment:  stecli pay (detect 402 → sign → settle) → stellar-account (verify payment)
+x402 Payment:  stelagent pay (detect 402 → sign → settle) → stellar-account (verify payment)
 ```
 
 ### 6.4 MCP Server Implementation
@@ -455,7 +455,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 
 export function startMcpServer(): void {
   const server = new McpServer({
-    name: "stecli",
+    name: "stelagent",
     version: "0.1.0",
   });
 
@@ -548,24 +548,24 @@ export class HorizonService extends Context.Tag("HorizonService")<
 Following the OnchainOS pattern:
 
 ```
-~/.stecli/audit.jsonl
-{"ts":"2026-04-13T10:30:00.123Z","source":"cli","command":"account details","ok":true,"duration_ms":234,"args":["stecli","account","details","--network","testnet"]}
+~/.stelagent/audit.jsonl
+{"ts":"2026-04-13T10:30:00.123Z","source":"cli","command":"account details","ok":true,"duration_ms":234,"args":["stelagent","account","details","--network","testnet"]}
 ```
 
 - Source: `cli` or `mcp`
 - Sensitive flags redacted: `--secret`, `--wallet`, `--email`
 - Rotation: keep most recent 5,000 lines when file exceeds 10,000
-- Enabled by default, opt-out via `STECLI_NO_AUDIT=1`
+- Enabled by default, opt-out via `STELAGENT_NO_AUDIT=1`
 
 ### 6.7 Auth Model (Proposed)
 
 Layered auth following OnchainOS's approach:
 
-| Mode               | When Used                                | Storage                            |
-| ------------------ | ---------------------------------------- | ---------------------------------- |
-| **Server session** | User logged in via `stecli wallet login` | `~/.stecli/session.json` (current) |
-| **API key**        | Env vars `STECLI_API_KEY`                | Not persisted                      |
-| **Anonymous**      | No credentials                           | N/A                                |
+| Mode               | When Used                                   | Storage                               |
+| ------------------ | ------------------------------------------- | ------------------------------------- |
+| **Server session** | User logged in via `stelagent wallet login` | `~/.stelagent/session.json` (current) |
+| **API key**        | Env vars `STELAGENT_API_KEY`                | Not persisted                         |
+| **Anonymous**      | No credentials                              | N/A                                   |
 
 Priority: Existing session → API key env var → Anonymous (read-only Horizon data).
 
@@ -574,8 +574,8 @@ Priority: Existing session → API key env var → Anonymous (read-only Horizon 
 Following OnchainOS's pattern:
 
 ```bash
-stecli upgrade              # check and install latest stable
-stecli upgrade --beta       # include pre-releases
+stelagent upgrade              # check and install latest stable
+stelagent upgrade --beta       # include pre-releases
 ```
 
 - Check GitHub releases API for latest version
@@ -587,7 +587,7 @@ stecli upgrade --beta       # include pre-releases
 
 ## 7. What to Build on Stellar
 
-Based on the Horizon API analysis, these are the high-value capabilities for stecli:
+Based on the Horizon API analysis, these are the high-value capabilities for stelagent:
 
 ### 7.1 Wallet Insights (Current — Enhanced)
 
@@ -599,7 +599,7 @@ Based on the Horizon API analysis, these are the high-value capabilities for ste
 
 - Standard payments: XLM and custom assets via `Operation.payment`
 - Path payments: Multi-hop FX via `Operation.pathPaymentStrictSend`
-- x402 micropayments: Agent-to-agent HTTP 402 protocol (current `stecli pay`)
+- x402 micropayments: Agent-to-agent HTTP 402 protocol (current `stelagent pay`)
 - Claimable balances: Create, claim, filter by claimant
 
 ### 7.3 Account Monitoring
@@ -643,31 +643,31 @@ Following OnchainOS's pattern of composing skills into flows:
 **Check Balance and Send:**
 
 ```
-stecli wallet balance → stecli account details → stecli send
+stelagent wallet balance → stelagent account details → stelagent send
 ```
 
 **Research Asset and Trade:**
 
 ```
-stecli assets search USDC → stecli assets orderbook → stecli send (path payment)
+stelagent assets search USDC → stelagent assets orderbook → stelagent send (path payment)
 ```
 
 **Monitor Activity:**
 
 ```
-stecli monitor transactions → stecli account effects → stecli account payments
+stelagent monitor transactions → stelagent account effects → stelagent account payments
 ```
 
 **x402 Payment Flow:**
 
 ```
-stecli pay <url> → (402 response) → sign Soroban auth → settle → stecli account payments (verify)
+stelagent pay <url> → (402 response) → sign Soroban auth → settle → stelagent account payments (verify)
 ```
 
 **Full Portfolio Review:**
 
 ```
-stecli wallet balance → stecli account details → stecli assets info (per asset)
+stelagent wallet balance → stelagent account details → stelagent assets info (per asset)
 ```
 
 ---
@@ -676,7 +676,7 @@ stecli wallet balance → stecli account details → stecli assets info (per ass
 
 | Phase                    | Deliverables                                                                                                       | Timeline |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------ | -------- |
-| **P0 — Foundation**      | Fix `db/server.ts`, add `@stecli/sdk` package, add `account` command, add `audit` service                          | Week 1   |
+| **P0 — Foundation**      | Fix `db/server.ts`, add `@stelagent/sdk` package, add `account` command, add `audit` service                       | Week 1   |
 | **P1 — Core Skills**     | Skill definitions (stellar-wallet, stellar-account, stellar-pay, stellar-assets), `send` command, `assets` command | Week 2   |
 | **P2 — MCP + Streaming** | MCP server with 25+ tools, `monitor` command with SSE streaming                                                    | Week 3   |
 | **P3 — Advanced**        | Soroban contract interaction, `defi` commands, `security` commands, self-upgrade                                   | Week 4   |
@@ -686,7 +686,7 @@ stecli wallet balance → stecli account details → stecli assets info (per ass
 ## 10. Unresolved Questions
 
 1. **Auth model**: Keep server-side wallets (current) or add local key management like OnchainOS (keyring + encrypted file)?
-2. **SDK extraction**: Should `@stecli/sdk` be published as a standalone package for other projects to use?
+2. **SDK extraction**: Should `@stelagent/sdk` be published as a standalone package for other projects to use?
 3. **MCP implementation**: Use `@modelcontextprotocol/sdk` (TypeScript) or build a thin custom adapter?
 4. **Dashboard**: Should the website dashboard (`/dashboard` routes) be rebuilt, or is CLI-only the priority?
 5. **SSE streaming**: Wrap Node.js EventSource in the Effect-TS streaming pattern, or use a different approach?

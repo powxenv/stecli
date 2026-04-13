@@ -30,7 +30,7 @@ export default function OtpEmail({ otp, email }: OtpEmailProps) {
           fontWeight={400}
         />
       </Head>
-      <Preview>Your Stecli verification code is {otp}</Preview>
+      <Preview>Your Stelagent verification code is {otp}</Preview>
       <Body
         style={{
           backgroundColor: "#0a0a0a",
@@ -49,8 +49,8 @@ export default function OtpEmail({ otp, email }: OtpEmailProps) {
         >
           <Section style={{ marginBottom: "40px" }}>
             <Img
-              src="https://stecli.noval.me/stellar.svg"
-              alt="Stecli"
+              src="https://stelagent.noval.me/stellar.svg"
+              alt="Stelagent"
               width="28"
               height="28"
               style={{ display: "inline-block", verticalAlign: "middle", marginRight: "10px" }}
@@ -66,7 +66,7 @@ export default function OtpEmail({ otp, email }: OtpEmailProps) {
                 verticalAlign: "middle",
               }}
             >
-              Stecli
+              Stelagent
             </Text>
           </Section>
 
@@ -170,7 +170,7 @@ export default function OtpEmail({ otp, email }: OtpEmailProps) {
                 lineHeight: "1.5",
               }}
             >
-              Stecli: Agent-first CLI for Stellar
+              Stelagent: Agent-first CLI for Stellar
             </Text>
             <Text
               style={{
@@ -181,14 +181,14 @@ export default function OtpEmail({ otp, email }: OtpEmailProps) {
               }}
             >
               <a
-                href="https://stecli.noval.me"
+                href="https://stelagent.noval.me"
                 style={{
                   color: "#333333",
                   textDecoration: "underline",
                   fontSize: "11px",
                 }}
               >
-                stecli.noval.me
+                stelagent.noval.me
               </a>
             </Text>
           </Section>

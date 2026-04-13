@@ -15,8 +15,8 @@ import type {
 } from "#/domain/types.js";
 
 const HORIZON_URLS: Record<Network, string> = {
-  testnet: process.env.STECLI_HORIZON_TESTNET_URL ?? "https://horizon-testnet.stellar.org",
-  pubnet: process.env.STECLI_HORIZON_PUBNET_URL ?? "https://horizon-mainnet.stellar.org",
+  testnet: process.env.STELAGENT_HORIZON_TESTNET_URL ?? "https://horizon-testnet.stellar.org",
+  pubnet: process.env.STELAGENT_HORIZON_PUBNET_URL ?? "https://horizon-mainnet.stellar.org",
 };
 
 const NETWORK_PASSPHRASE: Record<Network, string> = {

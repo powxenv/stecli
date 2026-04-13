@@ -4,43 +4,43 @@ const commands = [
   {
     group: "wallet",
     items: [
-      { cmd: "npx stecli wallet login -e you@example.com", desc: "OTP login" },
-      { cmd: "npx stecli wallet address", desc: "Show public key" },
-      { cmd: "npx stecli wallet balance", desc: "Check balances" },
-      { cmd: "npx stecli wallet transfer -t GDXXX... -a 10", desc: "Send XLM" },
-      { cmd: "npx stecli wallet logout", desc: "Clear session" },
+      { cmd: "npx stelagent wallet login -e you@example.com", desc: "OTP login" },
+      { cmd: "npx stelagent wallet address", desc: "Show public key" },
+      { cmd: "npx stelagent wallet balance", desc: "Check balances" },
+      { cmd: "npx stelagent wallet transfer -t GDXXX... -a 10", desc: "Send XLM" },
+      { cmd: "npx stelagent wallet logout", desc: "Clear session" },
     ],
   },
   {
     group: "account",
     items: [
-      { cmd: "npx stecli account details <address>", desc: "Account info" },
-      { cmd: "npx stecli account transactions <address>", desc: "TX history" },
-      { cmd: "npx stecli account payments <address>", desc: "Payment history" },
-      { cmd: "npx stecli account effects <address>", desc: "Account effects" },
+      { cmd: "npx stelagent account details <address>", desc: "Account info" },
+      { cmd: "npx stelagent account transactions <address>", desc: "TX history" },
+      { cmd: "npx stelagent account payments <address>", desc: "Payment history" },
+      { cmd: "npx stelagent account effects <address>", desc: "Account effects" },
     ],
   },
   {
     group: "assets",
     items: [
-      { cmd: "npx stecli assets search --code USDC", desc: "Search assets" },
-      { cmd: "npx stecli assets orderbook --selling XLM --buying USDC", desc: "Order book" },
+      { cmd: "npx stelagent assets search --code USDC", desc: "Search assets" },
+      { cmd: "npx stelagent assets orderbook --selling XLM --buying USDC", desc: "Order book" },
     ],
   },
   {
     group: "actions",
     items: [
-      { cmd: "npx stecli send <destination> <amount> --asset native", desc: "Send payment" },
-      { cmd: "npx stecli pay https://api.example.com/premium", desc: "x402 micropayment" },
-      { cmd: "npx stecli fee", desc: "Current fee stats" },
+      { cmd: "npx stelagent send <destination> <amount> --asset native", desc: "Send payment" },
+      { cmd: "npx stelagent pay https://api.example.com/premium", desc: "x402 micropayment" },
+      { cmd: "npx stelagent fee", desc: "Current fee stats" },
     ],
   },
   {
     group: "monitor",
     items: [
-      { cmd: "npx stecli monitor transactions <address>", desc: "Stream TXs" },
-      { cmd: "npx stecli monitor payments <address>", desc: "Stream payments" },
-      { cmd: "npx stecli monitor effects <address>", desc: "Stream effects" },
+      { cmd: "npx stelagent monitor transactions <address>", desc: "Stream TXs" },
+      { cmd: "npx stelagent monitor payments <address>", desc: "Stream payments" },
+      { cmd: "npx stelagent monitor effects <address>", desc: "Stream effects" },
     ],
   },
 ];

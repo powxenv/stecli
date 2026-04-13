@@ -6,8 +6,8 @@ import { z } from "zod";
 import { SessionNotFoundError, SessionReadError, SessionWriteError } from "#/domain/errors.js";
 import type { SessionData, SessionResult } from "#/domain/types.js";
 
-const STECLI_DIR = join(homedir(), ".stecli");
-const SESSION_FILE = join(STECLI_DIR, "session.json");
+const STELAGENT_DIR = join(homedir(), ".stelagent");
+const SESSION_FILE = join(STELAGENT_DIR, "session.json");
 
 const SessionDataSchema = z.object({
   token: z.string(),
@@ -17,7 +17,7 @@ const SessionDataSchema = z.object({
 export function saveSession(token: string, email: string): SessionResult<void> {
   return Result.try({
     try: () => {
-      if (!existsSync(STECLI_DIR)) mkdirSync(STECLI_DIR, { recursive: true });
+      if (!existsSync(STELAGENT_DIR)) mkdirSync(STELAGENT_DIR, { recursive: true });
       writeFileSync(SESSION_FILE, JSON.stringify({ token, email }, null, 2), { mode: 0o600 });
     },
     catch: (e: unknown) => new SessionWriteError({ cause: String(e) }),
