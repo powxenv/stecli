@@ -40,19 +40,3 @@ export const limitSchema = z.coerce.number().int().min(1).max(200).default(10);
 export const orderSchema = z.enum(["asc", "desc"]).default("desc");
 
 export const resolutionSchema = z.coerce.number().int().min(60000);
-
-export const validatePublicKey = (value: string): string => {
-  return stellarPublicKey.parse(value);
-};
-
-export const validateEmail = (value: string): string => {
-  return emailSchema.parse(value);
-};
-
-export const validateAmount = (value: string): string => {
-  return amountSchema.parse(value);
-};
-
-export const validateAsset = (value: string): string => {
-  return assetSchema.parse(value);
-};

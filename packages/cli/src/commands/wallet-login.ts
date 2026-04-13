@@ -1,15 +1,24 @@
 import { defineCommand } from "citty";
+import { Result } from "better-result";
 import { text, isCancel, cancel, log } from "@clack/prompts";
 import pc from "picocolors";
-import { Effect } from "effect";
 import { z } from "zod";
 import { runApp } from "#/lib/run.js";
-import { OutputService } from "#/services/output.js";
-import { AuthService } from "#/services/auth.js";
-import { SessionService } from "#/services/session.js";
-import { WalletClientService } from "#/services/wallet-client.js";
+import {
+  printResult,
+  printData,
+  formatSessionError,
+  formatWalletError,
+} from "#/services/output.js";
+import { requestOtp, verifyOtp } from "#/services/auth.js";
+import { saveSession } from "#/services/session.js";
+import { createWallet } from "#/services/wallet-client.js";
 import { networkArg, formatArg, parseNetwork, parseFormat } from "#/lib/args.js";
 import { emailSchema } from "#/domain/validators.js";
+
+function formatZodError(e: z.ZodError): string {
+  return e.issues.map((issue) => issue.message).join(", ");
+}
 
 export const walletLogin = defineCommand({
   meta: {
@@ -27,51 +36,42 @@ export const walletLogin = defineCommand({
     format: formatArg,
   },
   async run({ args }) {
-    const email = args.email as string;
-    let network: "testnet" | "pubnet";
-    let format: "json" | "text";
-    try {
-      network = parseNetwork((args.network ?? "testnet") as string);
-      format = parseFormat(args.format as string);
-      emailSchema.parse(email);
-    } catch (e: unknown) {
-      if (e instanceof z.ZodError) {
-        console.log(
-          JSON.stringify(
-            {
-              ok: false,
-              error: e.issues.map((err: { message: string }) => err.message).join(", "),
-            },
-            null,
-            2,
-          ),
-        );
-      } else {
-        console.log(
-          JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }, null, 2),
-        );
-      }
+    const email = String(args.email ?? "");
+    const networkResult = parseNetwork(String(args.network ?? "testnet"));
+    const format = parseFormat(String(args.format ?? "json"));
+
+    if (Result.isError(networkResult)) {
+      printResult(Result.err(networkResult.error._tag), "json");
+      return;
+    }
+
+    const network = networkResult.value;
+
+    const validation = Result.try({
+      try: () => emailSchema.parse(email),
+      catch: (e: unknown) => e,
+    });
+    if (Result.isError(validation)) {
+      const msg =
+        validation.error instanceof z.ZodError
+          ? formatZodError(validation.error)
+          : validation.error instanceof Error
+            ? validation.error.message
+            : String(validation.error);
+      printResult(Result.err(msg), format);
       return;
     }
 
     log.message(pc.cyan(`Sending OTP to ${email}...`));
 
-    const requestProgram = Effect.gen(function* () {
-      const auth = yield* AuthService;
-      return yield* auth.requestOtp(email);
-    }).pipe(
-      Effect.catchTags({
-        AuthRequestError: () =>
-          Effect.gen(function* () {
-            const output = yield* OutputService;
-            log.warn(pc.yellow("Auth API unavailable. Please try again later."));
-            yield* output.print(output.err("Could not reach auth server."));
-            return null;
-          }),
-      }),
-    );
+    const otpResponseResult = await requestOtp(email);
+    if (Result.isError(otpResponseResult)) {
+      const msg = `AuthRequestError: ${otpResponseResult.error.cause}`;
+      printResult(Result.err(msg), format);
+      return;
+    }
 
-    const otpResponse = await runApp(requestProgram, "wallet login request", format);
+    const otpResponse = otpResponseResult.value;
     if (!otpResponse || !otpResponse.ok) return;
 
     log.success(otpResponse.message);
@@ -89,60 +89,50 @@ export const walletLogin = defineCommand({
       process.exit(0);
     }
 
-    const otp = otpInput as string;
+    const otp = String(otpInput);
 
-    const verifyAndCreateProgram = Effect.gen(function* () {
-      const output = yield* OutputService;
-      const auth = yield* AuthService;
-      const session = yield* SessionService;
-      const walletClient = yield* WalletClientService;
+    await runApp(
+      "wallet login verify",
+      async () => {
+        const verifyResult = await verifyOtp(email, otp);
+        if (Result.isError(verifyResult)) {
+          printResult(Result.err(`OTP verification failed: ${verifyResult.error.cause}`), format);
+          return undefined;
+        }
 
-      const verifyResponse = yield* auth.verifyOtp(email, otp);
-      if (!verifyResponse.verified) {
-        yield* output.print(output.err("OTP verification failed."));
-        return;
-      }
+        const verifyResponse = verifyResult.value;
+        if (!verifyResponse.verified) {
+          printResult(Result.err("OTP verification failed."), format);
+          return undefined;
+        }
 
-      yield* session.save(verifyResponse.token, verifyResponse.email);
+        const sessionResult = saveSession(verifyResponse.token, verifyResponse.email);
+        if (Result.isError(sessionResult)) {
+          printResult(Result.err(formatSessionError(sessionResult.error)), format);
+          return undefined;
+        }
 
-      log.message(pc.cyan("Setting up your wallet..."));
+        log.message(pc.cyan("Setting up your wallet..."));
 
-      const wallet = yield* walletClient.createWallet(network);
+        const walletResult = await createWallet(network);
+        if (Result.isError(walletResult)) {
+          printResult(Result.err(formatWalletError(walletResult.error)), format);
+          return undefined;
+        }
 
-      log.success(
-        pc.green(
-          wallet.publicKey
-            ? `Wallet ready: ${wallet.publicKey.slice(0, 8)}...`
-            : "Wallet recovered!",
-        ),
-      );
+        const wallet = walletResult.value;
+        log.success(
+          pc.green(
+            wallet.publicKey
+              ? `Wallet ready: ${wallet.publicKey.slice(0, 8)}...`
+              : "Wallet recovered!",
+          ),
+        );
 
-      yield* output.print(output.ok({ wallet }));
-    }).pipe(
-      Effect.catchTags({
-        OtpVerifyError: () =>
-          Effect.gen(function* () {
-            const output = yield* OutputService;
-            yield* output.print(output.err("OTP verification failed. Please try again."));
-          }),
-        SessionWriteError: (e) =>
-          Effect.gen(function* () {
-            const output = yield* OutputService;
-            yield* output.print(output.err(`Failed to save session: ${e.cause}`));
-          }),
-        WalletNotFoundError: () =>
-          Effect.gen(function* () {
-            const output = yield* OutputService;
-            yield* output.print(output.err("No session found. Please try again."));
-          }),
-        WalletCreateError: () =>
-          Effect.gen(function* () {
-            const output = yield* OutputService;
-            yield* output.print(output.err("Failed to create wallet. Please try again."));
-          }),
-      }),
+        printData({ wallet }, format);
+        return wallet;
+      },
+      format,
     );
-
-    await runApp(verifyAndCreateProgram, "wallet login verify", format);
   },
 });

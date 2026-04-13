@@ -1,48 +1,45 @@
-import { Context, Effect, Layer } from "effect";
+import { Result } from "better-result";
 import { AuthRequestError, OtpVerifyError } from "#/domain/errors.js";
-import type { OtpResponse, VerifyResponse } from "#/domain/types.js";
+import type { OtpResponse, VerifyResponse, AuthResult } from "#/domain/types.js";
 
 const API_BASE_URL = process.env.STECLI_API_URL ?? "https://stecli.noval.me";
 
-export class AuthService extends Context.Tag("AuthService")<
-  AuthService,
-  {
-    readonly requestOtp: (email: string) => Effect.Effect<OtpResponse, AuthRequestError>;
-    readonly verifyOtp: (
-      email: string,
-      otp: string,
-    ) => Effect.Effect<VerifyResponse, OtpVerifyError>;
-  }
->() {}
+export function requestOtp(email: string): Promise<AuthResult<OtpResponse>> {
+  return Result.tryPromise({
+    try: async () => {
+      const res = await fetch(`${API_BASE_URL}/api/cli/auth/otp/request`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) {
+        throw new AuthRequestError({ cause: `${res.status} ${res.statusText}` });
+      }
+      return (await res.json()) as OtpResponse;
+    },
+    catch: (e: unknown): AuthRequestError =>
+      e instanceof AuthRequestError
+        ? e
+        : new AuthRequestError({ cause: e instanceof Error ? e.message : String(e) }),
+  });
+}
 
-export const AuthLive = Layer.succeed(AuthService, {
-  requestOtp: (email: string) =>
-    Effect.tryPromise({
-      try: () =>
-        fetch(`${API_BASE_URL}/api/cli/auth/otp/request`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ email }),
-        }).then((res) => {
-          if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-          return res.json() as Promise<OtpResponse>;
-        }),
-      catch: (e: unknown) =>
-        new AuthRequestError({ cause: e instanceof Error ? e.message : String(e) }),
-    }),
-
-  verifyOtp: (email: string, otp: string) =>
-    Effect.tryPromise({
-      try: () =>
-        fetch(`${API_BASE_URL}/api/cli/auth/otp/verify`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ email, otp }),
-        }).then((res) => {
-          if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-          return res.json() as Promise<VerifyResponse>;
-        }),
-      catch: (e: unknown) =>
-        new OtpVerifyError({ cause: e instanceof Error ? e.message : String(e) }),
-    }),
-});
+export function verifyOtp(email: string, otp: string): Promise<AuthResult<VerifyResponse>> {
+  return Result.tryPromise({
+    try: async () => {
+      const res = await fetch(`${API_BASE_URL}/api/cli/auth/otp/verify`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email, otp }),
+      });
+      if (!res.ok) {
+        throw new OtpVerifyError({ cause: `${res.status} ${res.statusText}` });
+      }
+      return (await res.json()) as VerifyResponse;
+    },
+    catch: (e: unknown): OtpVerifyError =>
+      e instanceof OtpVerifyError
+        ? e
+        : new OtpVerifyError({ cause: e instanceof Error ? e.message : String(e) }),
+  });
+}

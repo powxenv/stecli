@@ -1,7 +1,7 @@
-import { Context, Effect, Layer } from "effect";
-import { SessionService } from "#/services/session.js";
+import { Result } from "better-result";
 import { WalletNotFoundError, WalletFetchError, WalletCreateError } from "#/domain/errors.js";
-import type { WalletInfo } from "#/domain/types.js";
+import type { WalletInfo, WalletResult } from "#/domain/types.js";
+import { loadSession } from "#/services/session.js";
 
 const API_BASE_URL = process.env.STECLI_API_URL ?? "https://stecli.noval.me";
 
@@ -11,78 +11,87 @@ export interface WalletAddress {
   readonly email: string;
 }
 
-export class WalletClientService extends Context.Tag("WalletClientService")<
-  WalletClientService,
-  {
-    readonly fetchWallet: () => Effect.Effect<WalletInfo, WalletNotFoundError | WalletFetchError>;
-    readonly fetchAddress: () => Effect.Effect<
-      WalletAddress,
-      WalletNotFoundError | WalletFetchError
-    >;
-    readonly createWallet: (
-      network: string,
-    ) => Effect.Effect<WalletInfo, WalletNotFoundError | WalletCreateError>;
+function requireSession(): WalletResult<SessionData> {
+  const sessionResult = loadSession();
+  if (Result.isError(sessionResult)) {
+    return Result.err(new WalletNotFoundError());
   }
->() {}
+  const session = sessionResult.value;
+  if (!("token" in session) || !("email" in session)) {
+    return Result.err(new WalletNotFoundError());
+  }
+  return Result.ok(session);
+}
 
-export const WalletClientLive = Layer.effect(
-  WalletClientService,
-  Effect.gen(function* () {
-    const session = yield* SessionService;
+interface SessionData {
+  readonly token: string;
+  readonly email: string;
+}
 
-    return {
-      fetchWallet: () =>
-        Effect.gen(function* () {
-          const s = yield* session.load().pipe(Effect.mapError(() => new WalletNotFoundError()));
-          const response = yield* Effect.tryPromise({
-            try: () =>
-              fetch(`${API_BASE_URL}/api/cli/wallet`, {
-                headers: { authorization: `Bearer ${s.token}` },
-              }).then((r) => {
-                if (!r.ok) throw new Error(`${r.status}`);
-                return r.json() as Promise<{ ok: boolean; wallet: WalletInfo }>;
-              }),
-            catch: (e: unknown) => new WalletFetchError({ cause: String(e) }),
-          });
-          return response.wallet;
-        }),
+export async function fetchWallet(): Promise<WalletResult<WalletInfo>> {
+  const sessionResult = requireSession();
+  if (Result.isError(sessionResult)) return Result.err(sessionResult.error);
+  const s = sessionResult.value;
 
-      fetchAddress: () =>
-        Effect.gen(function* () {
-          const s = yield* session.load().pipe(Effect.mapError(() => new WalletNotFoundError()));
-          const response = yield* Effect.tryPromise({
-            try: () =>
-              fetch(`${API_BASE_URL}/api/cli/wallet/address`, {
-                headers: { authorization: `Bearer ${s.token}` },
-              }).then((r) => {
-                if (!r.ok) throw new Error(`${r.status}`);
-                return r.json() as Promise<{ ok: boolean; address: WalletAddress }>;
-              }),
-            catch: (e: unknown) => new WalletFetchError({ cause: String(e) }),
-          });
-          return response.address;
-        }),
+  return Result.tryPromise({
+    try: async () => {
+      const res = await fetch(`${API_BASE_URL}/api/cli/wallet`, {
+        headers: { authorization: `Bearer ${s.token}` },
+      });
+      if (!res.ok) {
+        throw new WalletFetchError({ cause: String(res.status) });
+      }
+      const data = (await res.json()) as { ok: boolean; wallet: WalletInfo };
+      return data.wallet;
+    },
+    catch: (e: unknown): WalletFetchError =>
+      e instanceof WalletFetchError ? e : new WalletFetchError({ cause: String(e) }),
+  });
+}
 
-      createWallet: (network: string) =>
-        Effect.gen(function* () {
-          const s = yield* session.load().pipe(Effect.mapError(() => new WalletNotFoundError()));
-          const response = yield* Effect.tryPromise({
-            try: () =>
-              fetch(`${API_BASE_URL}/api/cli/wallet/create`, {
-                method: "POST",
-                headers: {
-                  authorization: `Bearer ${s.token}`,
-                  "content-type": "application/json",
-                },
-                body: JSON.stringify({ network }),
-              }).then((r) => {
-                if (!r.ok) throw new Error(`${r.status}`);
-                return r.json() as Promise<{ ok: boolean; created: boolean; wallet: WalletInfo }>;
-              }),
-            catch: (e: unknown) => new WalletCreateError({ cause: String(e) }),
-          });
-          return response.wallet;
-        }),
-    };
-  }),
-);
+export async function fetchAddress(): Promise<WalletResult<WalletAddress>> {
+  const sessionResult = requireSession();
+  if (Result.isError(sessionResult)) return Result.err(sessionResult.error);
+  const s = sessionResult.value;
+
+  return Result.tryPromise({
+    try: async () => {
+      const res = await fetch(`${API_BASE_URL}/api/cli/wallet/address`, {
+        headers: { authorization: `Bearer ${s.token}` },
+      });
+      if (!res.ok) {
+        throw new WalletFetchError({ cause: String(res.status) });
+      }
+      const data = (await res.json()) as { ok: boolean; address: WalletAddress };
+      return data.address;
+    },
+    catch: (e: unknown): WalletFetchError =>
+      e instanceof WalletFetchError ? e : new WalletFetchError({ cause: String(e) }),
+  });
+}
+
+export async function createWallet(network: string): Promise<WalletResult<WalletInfo>> {
+  const sessionResult = requireSession();
+  if (Result.isError(sessionResult)) return Result.err(sessionResult.error);
+  const s = sessionResult.value;
+
+  return Result.tryPromise({
+    try: async () => {
+      const res = await fetch(`${API_BASE_URL}/api/cli/wallet/create`, {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${s.token}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ network }),
+      });
+      if (!res.ok) {
+        throw new WalletCreateError({ cause: String(res.status) });
+      }
+      const data = (await res.json()) as { ok: boolean; created: boolean; wallet: WalletInfo };
+      return data.wallet;
+    },
+    catch: (e: unknown): WalletCreateError =>
+      e instanceof WalletCreateError ? e : new WalletCreateError({ cause: String(e) }),
+  });
+}

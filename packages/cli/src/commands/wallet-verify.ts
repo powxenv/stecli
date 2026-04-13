@@ -1,24 +1,21 @@
 import { defineCommand } from "citty";
-import { Effect } from "effect";
-import { runApp } from "#/lib/run.js";
-import { OutputService } from "#/services/output.js";
-import { AuthService } from "#/services/auth.js";
-import { SessionService } from "#/services/session.js";
-import { WalletClientService } from "#/services/wallet-client.js";
+import { Result } from "better-result";
+import { runCommand } from "#/lib/run.js";
+import {
+  printResult,
+  formatSessionError,
+  formatWalletError,
+  type OutputFormat,
+} from "#/services/output.js";
+import { verifyOtp } from "#/services/auth.js";
+import { saveSession } from "#/services/session.js";
+import { createWallet } from "#/services/wallet-client.js";
 import { networkArg, formatArg, parseNetwork, parseFormat } from "#/lib/args.js";
 
 export const walletVerify = defineCommand({
-  meta: {
-    name: "verify",
-    description: "Verify OTP and create or recover wallet",
-  },
+  meta: { name: "verify", description: "Verify OTP and create or recover wallet" },
   args: {
-    email: {
-      type: "string",
-      alias: ["e"],
-      description: "Your email address",
-      required: true,
-    },
+    email: { type: "string", alias: ["e"], description: "Your email address", required: true },
     otp: {
       type: "string",
       alias: ["o"],
@@ -29,62 +26,41 @@ export const walletVerify = defineCommand({
     format: formatArg,
   },
   async run({ args }) {
-    const email = args.email as string;
-    const otp = args.otp as string;
-    let network: "testnet" | "pubnet";
-    let format: "json" | "text";
-    try {
-      network = parseNetwork((args.network ?? "testnet") as string);
-      format = parseFormat(args.format as string);
-    } catch (e: unknown) {
-      console.log(
-        JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }, null, 2),
-      );
+    const email = String(args.email ?? "");
+    const otp = String(args.otp ?? "");
+    const networkResult = parseNetwork(String(args.network ?? "testnet"));
+    const format: OutputFormat = parseFormat(String(args.format ?? "json"));
+
+    if (Result.isError(networkResult)) {
+      printResult(Result.err(networkResult.error._tag), "json");
       return;
     }
 
-    const program = Effect.gen(function* () {
-      const output = yield* OutputService;
-      const auth = yield* AuthService;
-      const session = yield* SessionService;
-      const walletClient = yield* WalletClientService;
+    const network = networkResult.value;
 
-      const verifyResponse = yield* auth.verifyOtp(email, otp);
+    await runCommand(async () => {
+      const verifyResult = await verifyOtp(email, otp);
+      if (Result.isError(verifyResult)) {
+        return Result.err(
+          `OTP verification failed. Please try again. (${verifyResult.error.cause})`,
+        );
+      }
+      const verifyResponse = verifyResult.value;
       if (!verifyResponse.verified) {
-        yield* output.print(output.err("OTP verification failed."));
-        return;
+        return Result.err("OTP verification failed.");
       }
 
-      yield* session.save(verifyResponse.token, verifyResponse.email);
+      const sessionResult = saveSession(verifyResponse.token, verifyResponse.email);
+      if (Result.isError(sessionResult)) {
+        return Result.err(formatSessionError(sessionResult.error));
+      }
 
-      const wallet = yield* walletClient.createWallet(network);
+      const walletResult = await createWallet(network);
+      if (Result.isError(walletResult)) {
+        return Result.err(formatWalletError(walletResult.error));
+      }
 
-      yield* output.print(output.ok({ wallet }));
-    }).pipe(
-      Effect.catchTags({
-        OtpVerifyError: () =>
-          Effect.gen(function* () {
-            const output = yield* OutputService;
-            yield* output.print(output.err("OTP verification failed. Please try again."));
-          }),
-        SessionWriteError: (e) =>
-          Effect.gen(function* () {
-            const output = yield* OutputService;
-            yield* output.print(output.err(`Failed to save session: ${e.cause}`));
-          }),
-        WalletNotFoundError: () =>
-          Effect.gen(function* () {
-            const output = yield* OutputService;
-            yield* output.print(output.err("No session found. Please try again."));
-          }),
-        WalletCreateError: () =>
-          Effect.gen(function* () {
-            const output = yield* OutputService;
-            yield* output.print(output.err("Failed to create wallet. Please try again."));
-          }),
-      }),
-    );
-
-    await runApp(program, "wallet verify", format);
+      return Result.ok({ wallet: walletResult.value });
+    }, format);
   },
 });

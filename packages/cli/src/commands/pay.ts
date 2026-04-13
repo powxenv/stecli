@@ -1,81 +1,47 @@
 import { defineCommand } from "citty";
-import { Effect } from "effect";
+import { Result } from "better-result";
 import { z } from "zod";
-import { runApp } from "#/lib/run.js";
-import { OutputService } from "#/services/output.js";
-import { PaymentService } from "#/services/payment.js";
+import { runCommand } from "#/lib/run.js";
+import { printResult, formatPaymentError, type OutputFormat } from "#/services/output.js";
+import { pay } from "#/services/payment.js";
 import { formatArg, parseFormat } from "#/lib/args.js";
 import { urlSchema } from "#/domain/validators.js";
 
+function formatZodError(e: z.ZodError): string {
+  return e.issues.map((issue) => issue.message).join(", ");
+}
+
 export const payCommand = defineCommand({
-  meta: {
-    name: "pay",
-    description: "Make an x402 payment to a URL",
-  },
+  meta: { name: "pay", description: "Make an x402 payment to a URL" },
   args: {
-    url: {
-      type: "positional",
-      description: "URL to pay for",
-      required: true,
-    },
+    url: { type: "positional", description: "URL to pay for", required: true },
     format: formatArg,
   },
   async run({ args }) {
-    let format: "json" | "text";
-    try {
-      format = parseFormat(args.format as string);
-      urlSchema.parse(args.url as string);
-    } catch (e: unknown) {
-      if (e instanceof z.ZodError) {
-        console.log(
-          JSON.stringify(
-            {
-              ok: false,
-              error: e.issues.map((err: { message: string }) => err.message).join(", "),
-            },
-            null,
-            2,
-          ),
-        );
-      } else {
-        console.log(
-          JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }, null, 2),
-        );
-      }
+    const format: OutputFormat = parseFormat(String(args.format ?? "json"));
+
+    const url = String(args.url ?? "");
+    const validation = Result.try({
+      try: () => urlSchema.parse(url),
+      catch: (e: unknown) => e,
+    });
+    if (Result.isError(validation)) {
+      const msg =
+        validation.error instanceof z.ZodError
+          ? formatZodError(validation.error)
+          : validation.error instanceof Error
+            ? validation.error.message
+            : String(validation.error);
+      printResult(Result.err(msg), format);
       return;
     }
-    const program = Effect.gen(function* () {
-      const output = yield* OutputService;
-      const payment = yield* PaymentService;
-      const result = yield* payment.pay(args.url as string);
-      yield* output.print(output.ok(result));
-    }).pipe(
-      Effect.catchTags({
-        WalletNotFoundError: () =>
-          Effect.gen(function* () {
-            const output = yield* OutputService;
-            yield* output.print(output.err("No wallet found. Run `stecli wallet login` first."));
-          }),
-        WalletFetchError: (e) =>
-          Effect.gen(function* () {
-            const output = yield* OutputService;
-            yield* output.print(output.err(`Failed to fetch wallet: ${e.cause}`));
-          }),
-        PaymentHttpError: (e) =>
-          Effect.gen(function* () {
-            const output = yield* OutputService;
-            yield* output.print(
-              output.err(`Payment failed. Status: ${e.status}. Settle: ${e.settle ?? "none"}`),
-            );
-          }),
-        PaymentSetupError: (e) =>
-          Effect.gen(function* () {
-            const output = yield* OutputService;
-            yield* output.print(output.err(`Payment setup failed: ${e.cause}`));
-          }),
-      }),
-    );
 
-    await runApp(program, "pay", format);
+    await runCommand(async () => {
+      const result = await pay(url);
+      if (Result.isError(result)) {
+        return Result.err(formatPaymentError(result.error));
+      }
+      return Result.ok(result.value);
+    }, format);
   },
 });

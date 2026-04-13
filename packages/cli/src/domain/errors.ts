@@ -1,72 +1,62 @@
-import { Data } from "effect";
+import { TaggedError } from "better-result";
 
-export class AuthRequestError extends Data.TaggedError("AuthRequestError")<{
-  readonly cause: string;
-}> {}
+export const AuthRequestError = TaggedError("AuthRequestError")<{ cause: string }>();
+export type AuthRequestError = InstanceType<typeof AuthRequestError>;
 
-export class OtpVerifyError extends Data.TaggedError("OtpVerifyError")<{
-  readonly cause: string;
-}> {}
+export const OtpVerifyError = TaggedError("OtpVerifyError")<{ cause: string }>();
+export type OtpVerifyError = InstanceType<typeof OtpVerifyError>;
 
-export class SessionNotFoundError extends Data.TaggedError("SessionNotFoundError")<{}> {}
+export const SessionNotFoundError = TaggedError("SessionNotFoundError")();
+export type SessionNotFoundError = InstanceType<typeof SessionNotFoundError>;
 
-export class SessionReadError extends Data.TaggedError("SessionReadError")<{
-  readonly cause: string;
-}> {}
+export const SessionReadError = TaggedError("SessionReadError")<{ cause: string }>();
+export type SessionReadError = InstanceType<typeof SessionReadError>;
 
-export class SessionWriteError extends Data.TaggedError("SessionWriteError")<{
-  readonly cause: string;
-}> {}
+export const SessionWriteError = TaggedError("SessionWriteError")<{ cause: string }>();
+export type SessionWriteError = InstanceType<typeof SessionWriteError>;
 
-export class WalletNotFoundError extends Data.TaggedError("WalletNotFoundError")<{}> {}
+export const WalletNotFoundError = TaggedError("WalletNotFoundError")();
+export type WalletNotFoundError = InstanceType<typeof WalletNotFoundError>;
 
-export class WalletFetchError extends Data.TaggedError("WalletFetchError")<{
-  readonly cause: string;
-}> {}
+export const WalletFetchError = TaggedError("WalletFetchError")<{ cause: string }>();
+export type WalletFetchError = InstanceType<typeof WalletFetchError>;
 
-export class WalletCreateError extends Data.TaggedError("WalletCreateError")<{
-  readonly cause: string;
-}> {}
+export const WalletCreateError = TaggedError("WalletCreateError")<{ cause: string }>();
+export type WalletCreateError = InstanceType<typeof WalletCreateError>;
 
-export class StellarAccountError extends Data.TaggedError("StellarAccountError")<{
-  readonly cause: string;
-}> {}
+export const StellarAccountError = TaggedError("StellarAccountError")<{ cause: string }>();
+export type StellarAccountError = InstanceType<typeof StellarAccountError>;
 
-export class StellarTransactionError extends Data.TaggedError("StellarTransactionError")<{
-  readonly cause: string;
-}> {}
+export const StellarTransactionError = TaggedError("StellarTransactionError")<{ cause: string }>();
+export type StellarTransactionError = InstanceType<typeof StellarTransactionError>;
 
-export class PaymentHttpError extends Data.TaggedError("PaymentHttpError")<{
-  readonly status: number;
-  readonly settle: string | null;
-}> {}
+export const PaymentHttpError = TaggedError("PaymentHttpError")<{
+  status: number;
+  settle: string | null;
+}>();
+export type PaymentHttpError = InstanceType<typeof PaymentHttpError>;
 
-export class PaymentSetupError extends Data.TaggedError("PaymentSetupError")<{
-  readonly cause: string;
-}> {}
+export const PaymentSetupError = TaggedError("PaymentSetupError")<{ cause: string }>();
+export type PaymentSetupError = InstanceType<typeof PaymentSetupError>;
 
-export class InvalidNetworkError extends Data.TaggedError("InvalidNetworkError")<{
-  readonly provided: string;
-}> {}
+export const InvalidNetworkError = TaggedError("InvalidNetworkError")<{ provided: string }>();
+export type InvalidNetworkError = InstanceType<typeof InvalidNetworkError>;
 
-export class HorizonError extends Data.TaggedError("HorizonError")<{
-  readonly cause: string;
-}> {}
+export const HorizonError = TaggedError("HorizonError")<{ cause: string }>();
+export type HorizonError = InstanceType<typeof HorizonError>;
 
-export class AuditError extends Data.TaggedError("AuditError")<{
-  readonly cause: string;
-}> {}
+export const AuditError = TaggedError("AuditError")<{ cause: string }>();
+export type AuditError = InstanceType<typeof AuditError>;
 
-export class UnfundedAccountError extends Data.TaggedError("UnfundedAccountError")<{
-  readonly address: string;
-}> {}
+export const UnfundedAccountError = TaggedError("UnfundedAccountError")<{ address: string }>();
+export type UnfundedAccountError = InstanceType<typeof UnfundedAccountError>;
 
-export class InsufficientBalanceError extends Data.TaggedError("InsufficientBalanceError")<{
-  readonly available: string;
-  readonly required: string;
-  readonly asset: string;
-}> {}
+export const InsufficientBalanceError = TaggedError("InsufficientBalanceError")<{
+  available: string;
+  required: string;
+  asset: string;
+}>();
+export type InsufficientBalanceError = InstanceType<typeof InsufficientBalanceError>;
 
-export class NetworkTimeoutError extends Data.TaggedError("NetworkTimeoutError")<{
-  readonly cause: string;
-}> {}
+export const NetworkTimeoutError = TaggedError("NetworkTimeoutError")<{ cause: string }>();
+export type NetworkTimeoutError = InstanceType<typeof NetworkTimeoutError>;

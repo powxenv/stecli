@@ -17,6 +17,18 @@
       "url": "https://github.com/agentmail-to/agentmail-skills.git",
       "branch": "main",
       "commit": "91672dec153f59e4c30c9a5cc21cb9fd4128e169"
+    },
+    "skill:better-result-adopt": {
+      "name": "better-result-adopt",
+      "url": "https://github.com/dmmulroy/better-result.git",
+      "branch": "main",
+      "commit": "b3a4a2a087d4fcc13eb1432eeefc6999e2b8adc6"
+    },
+    "skill:better-result-migrate-v2": {
+      "name": "better-result-migrate-v2",
+      "url": "https://github.com/dmmulroy/better-result.git",
+      "branch": "main",
+      "commit": "b3a4a2a087d4fcc13eb1432eeefc6999e2b8adc6"
     }
   }
 }

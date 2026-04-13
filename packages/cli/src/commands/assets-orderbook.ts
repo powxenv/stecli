@@ -1,8 +1,8 @@
 import { defineCommand } from "citty";
-import { Effect } from "effect";
-import { runApp } from "#/lib/run.js";
-import { OutputService } from "#/services/output.js";
-import { HorizonService } from "#/services/horizon.js";
+import { Result } from "better-result";
+import { runCommand } from "#/lib/run.js";
+import { printResult, formatHorizonError, type OutputFormat } from "#/services/output.js";
+import { getOrderbook } from "#/services/horizon.js";
 import { networkArg, formatArg, parseNetwork, parseFormat } from "#/lib/args.js";
 
 export const assetsOrderbook = defineCommand({
@@ -30,17 +30,15 @@ export const assetsOrderbook = defineCommand({
     },
   },
   async run({ args }) {
-    let network: "testnet" | "pubnet";
-    let format: "json" | "text";
-    try {
-      network = parseNetwork(args.network as string);
-      format = parseFormat(args.format as string);
-    } catch (e: unknown) {
-      console.log(
-        JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }, null, 2),
-      );
+    const networkResult = parseNetwork(String(args.network ?? "testnet"));
+    const format: OutputFormat = parseFormat(String(args.format ?? "json"));
+
+    if (Result.isError(networkResult)) {
+      printResult(Result.err(networkResult.error._tag), "json");
       return;
     }
+
+    const network = networkResult.value;
 
     function parseAsset(input: string): {
       assetType: string;
@@ -58,33 +56,30 @@ export const assetsOrderbook = defineCommand({
       };
     }
 
-    let sellingAsset: { assetType: string; assetCode?: string; assetIssuer?: string };
-    let buyingAsset: { assetType: string; assetCode?: string; assetIssuer?: string };
-    try {
-      sellingAsset = parseAsset(args.selling as string);
-      buyingAsset = parseAsset(args.buying as string);
-    } catch (e: unknown) {
-      console.log(
-        JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }, null, 2),
-      );
+    const parseAssets = Result.try({
+      try: () => ({
+        selling: parseAsset(String(args.selling ?? "")),
+        buying: parseAsset(String(args.buying ?? "")),
+      }),
+      catch: (e: unknown) => e,
+    });
+    if (Result.isError(parseAssets)) {
+      const msg =
+        parseAssets.error instanceof Error ? parseAssets.error.message : String(parseAssets.error);
+      printResult(Result.err(msg), "json");
       return;
     }
 
-    const program = Effect.gen(function* () {
-      const output = yield* OutputService;
-      const horizon = yield* HorizonService;
-      const orderbook = yield* horizon.getOrderbook(sellingAsset, buyingAsset, network, {
+    const { selling: sellingAsset, buying: buyingAsset } = parseAssets.value;
+
+    await runCommand(async () => {
+      const orderbookResult = await getOrderbook(sellingAsset, buyingAsset, network, {
         limit: Number(args.limit) || 10,
       });
-      yield* output.print(output.ok(orderbook));
-    }).pipe(
-      Effect.catchTag("HorizonError", (e) =>
-        Effect.gen(function* () {
-          const output = yield* OutputService;
-          yield* output.print(output.err(`Failed to fetch orderbook: ${e.cause}`));
-        }),
-      ),
-    );
-    await runApp(program, "assets orderbook", format);
+      if (Result.isError(orderbookResult))
+        return Result.err(formatHorizonError(orderbookResult.error));
+
+      return Result.ok(orderbookResult.value);
+    }, format);
   },
 });
