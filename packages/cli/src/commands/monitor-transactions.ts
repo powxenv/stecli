@@ -1,11 +1,16 @@
 import { defineCommand } from "citty";
-import { Effect } from "effect";
+import { Result } from "better-result";
 import { z } from "zod";
 import { runApp } from "#/lib/run.js";
-import { HorizonService } from "#/services/horizon.js";
+import { printResult, type OutputFormat } from "#/services/output.js";
+import { streamTransactions } from "#/services/horizon.js";
 import { networkArg, formatArg, parseNetwork, parseFormat } from "#/lib/args.js";
 import { stellarPublicKey } from "#/domain/validators.js";
 import type { Network } from "#/domain/types.js";
+
+function formatZodError(e: z.ZodError): string {
+  return e.issues.map((issue) => issue.message).join(", ");
+}
 
 export const monitorTransactions = defineCommand({
   meta: { name: "transactions", description: "Stream transactions for an account in real-time" },
@@ -25,60 +30,66 @@ export const monitorTransactions = defineCommand({
     },
   },
   async run({ args }) {
-    let network: Network;
-    let format: "json" | "text";
-    try {
-      network = parseNetwork(args.network as string);
-      format = parseFormat(args.format as string);
-      stellarPublicKey.parse(args.address as string);
-    } catch (e: unknown) {
-      if (e instanceof z.ZodError) {
-        console.log(
-          JSON.stringify(
-            {
-              ok: false,
-              error: e.issues.map((err: { message: string }) => err.message).join(", "),
-            },
-            null,
-            2,
-          ),
-        );
-      } else {
-        console.log(
-          JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }, null, 2),
-        );
-      }
+    const networkResult = parseNetwork(String(args.network ?? "testnet"));
+    const format: OutputFormat = parseFormat(String(args.format ?? "json"));
+
+    if (Result.isError(networkResult)) {
+      printResult(Result.err(networkResult.error._tag), "json");
       return;
     }
 
-    const cursor = args.cursor === "now" ? undefined : (args.cursor as string | undefined);
+    const network: Network = networkResult.value;
+    const address = String(args.address ?? "");
 
-    const close = await runApp(
-      Effect.gen(function* () {
-        const horizon = yield* HorizonService;
-        return yield* horizon.streamTransactions(
-          args.address as string,
-          network,
-          { cursor },
-          (record) => {
-            console.log(JSON.stringify({ ok: true, data: record }));
-          },
-          (error) => {
-            const message = error instanceof Error ? error.message : String(error);
-            console.log(JSON.stringify({ ok: false, error: `Stream error: ${message}` }));
-          },
-        );
-      }),
-      "monitor transactions",
-      format,
-    );
+    const validation = Result.try({
+      try: () => stellarPublicKey.parse(address),
+      catch: (e: unknown) => e,
+    });
+    if (Result.isError(validation)) {
+      const msg =
+        validation.error instanceof z.ZodError
+          ? formatZodError(validation.error)
+          : validation.error instanceof Error
+            ? validation.error.message
+            : String(validation.error);
+      printResult(Result.err(msg), format);
+      return;
+    }
+
+    const cursor = args.cursor === "now" ? undefined : String(args.cursor);
+
+    let close: () => void;
+    try {
+      close = await runApp(
+        "monitor transactions",
+        async () => {
+          return streamTransactions(
+            address,
+            network,
+            { cursor },
+            (record) => {
+              console.log(JSON.stringify({ ok: true, data: record }));
+            },
+            (error) => {
+              const message = error instanceof Error ? error.message : String(error);
+              console.log(JSON.stringify({ ok: false, error: `Stream error: ${message}` }));
+            },
+          );
+        },
+        format,
+      );
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      printResult(Result.err(`Failed to stream transactions: ${message}`), "json");
+      return;
+    }
 
     console.log(
       JSON.stringify(
         {
           ok: true,
           data: {
-            message: `Streaming transactions for ${args.address} on ${network}... Press Ctrl+C to stop.`,
+            message: `Streaming transactions for ${address} on ${network}... Press Ctrl+C to stop.`,
           },
         },
         null,

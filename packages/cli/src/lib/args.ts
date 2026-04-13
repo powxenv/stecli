@@ -1,3 +1,5 @@
+import { Result } from "better-result";
+import { InvalidNetworkError } from "#/domain/errors.js";
 import type { StringArgDef } from "citty";
 
 export const networkArg: StringArgDef = {
@@ -14,16 +16,12 @@ export const formatArg: StringArgDef = {
   default: "json",
 };
 
-export function parseNetwork(value: string): "testnet" | "pubnet" {
-  if (value !== "testnet" && value !== "pubnet") {
-    throw new Error("Invalid network. Must be 'testnet' or 'pubnet'.");
-  }
-  return value;
+export function parseNetwork(value: string): Result<"testnet" | "pubnet", InvalidNetworkError> {
+  if (value === "testnet" || value === "pubnet") return Result.ok(value);
+  return Result.err(new InvalidNetworkError({ provided: value }));
 }
 
 export function parseFormat(value: string): "json" | "text" {
-  if (value !== "json" && value !== "text") {
-    throw new Error("Invalid format. Must be 'json' or 'text'.");
-  }
-  return value;
+  if (value === "json" || value === "text") return value;
+  return "json";
 }

@@ -50,6 +50,6 @@ export function writeAuditEntry(entry: {
     });
     writeFileSync(AUDIT_FILE, line + "\n", { mode: 0o600, flag: "a" });
   } catch {
-    // audit failure should never crash the CLI
+    void 0;
   }
 }

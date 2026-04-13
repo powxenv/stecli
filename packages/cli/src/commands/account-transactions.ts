@@ -1,11 +1,15 @@
 import { defineCommand } from "citty";
-import { Effect } from "effect";
+import { Result } from "better-result";
 import { z } from "zod";
-import { runApp } from "#/lib/run.js";
-import { OutputService } from "#/services/output.js";
-import { HorizonService } from "#/services/horizon.js";
+import { runCommand } from "#/lib/run.js";
+import { printResult, formatHorizonError, type OutputFormat } from "#/services/output.js";
+import { getTransactions } from "#/services/horizon.js";
 import { networkArg, formatArg, parseNetwork, parseFormat } from "#/lib/args.js";
 import { stellarPublicKey } from "#/domain/validators.js";
+
+function formatZodError(e: z.ZodError): string {
+  return e.issues.map((issue) => issue.message).join(", ");
+}
 
 export const accountTransactions = defineCommand({
   meta: { name: "transactions", description: "List transactions for an account" },
@@ -36,50 +40,46 @@ export const accountTransactions = defineCommand({
     },
   },
   async run({ args }) {
-    let network: "testnet" | "pubnet";
-    let format: "json" | "text";
-    try {
-      network = parseNetwork(args.network as string);
-      format = parseFormat(args.format as string);
-      stellarPublicKey.parse(args.address as string);
-    } catch (e: unknown) {
-      if (e instanceof z.ZodError) {
-        console.log(
-          JSON.stringify(
-            {
-              ok: false,
-              error: e.issues.map((err: { message: string }) => err.message).join(", "),
-            },
-            null,
-            2,
-          ),
-        );
-      } else {
-        console.log(
-          JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }, null, 2),
-        );
-      }
+    const networkResult = parseNetwork(String(args.network ?? "testnet"));
+    const format: OutputFormat = parseFormat(String(args.format ?? "json"));
+
+    if (Result.isError(networkResult)) {
+      printResult(Result.err(networkResult.error._tag), "json");
       return;
     }
-    const program = Effect.gen(function* () {
-      const output = yield* OutputService;
-      const horizon = yield* HorizonService;
-      const transactions = yield* horizon.getTransactions(args.address as string, network, {
+
+    const network = networkResult.value;
+    const address = String(args.address ?? "");
+
+    const validation = Result.try({
+      try: () => stellarPublicKey.parse(address),
+      catch: (e: unknown) => e,
+    });
+    if (Result.isError(validation)) {
+      const msg =
+        validation.error instanceof z.ZodError
+          ? formatZodError(validation.error)
+          : validation.error instanceof Error
+            ? validation.error.message
+            : String(validation.error);
+      printResult(Result.err(msg), format);
+      return;
+    }
+
+    await runCommand(async () => {
+      const transactionsResult = await getTransactions(address, network, {
         limit: Number(args.limit) || 10,
-        cursor: args.cursor as string | undefined,
-        order: (args.order as "asc" | "desc") || "desc",
+        cursor: args.cursor != null ? String(args.cursor) : undefined,
+        order: args.order === "asc" ? "asc" : "desc",
       });
-      yield* output.print(
-        output.ok({ address: args.address as string, count: transactions.length, transactions }),
-      );
-    }).pipe(
-      Effect.catchTag("HorizonError", (e) =>
-        Effect.gen(function* () {
-          const output = yield* OutputService;
-          yield* output.print(output.err(`Failed to fetch transactions: ${e.cause}`));
-        }),
-      ),
-    );
-    await runApp(program, "account transactions", format);
+      if (Result.isError(transactionsResult))
+        return Result.err(formatHorizonError(transactionsResult.error));
+
+      return Result.ok({
+        address,
+        count: transactionsResult.value.length,
+        transactions: transactionsResult.value,
+      });
+    }, format);
   },
 });

@@ -1,40 +1,106 @@
-import { Context, Effect, Layer } from "effect";
 import pc from "picocolors";
-import type { CommandResult } from "#/domain/types.js";
+import { Result, matchErrorPartial } from "better-result";
+import type {
+  HorizonQueryError,
+  PaymentError,
+  SessionError,
+  StellarError,
+  WalletError,
+} from "#/domain/types.js";
 
 export type OutputFormat = "json" | "text";
 
-export class OutputService extends Context.Tag("OutputService")<
-  OutputService,
-  {
-    readonly ok: <T>(data: T) => CommandResult<T>;
-    readonly err: (error: string) => CommandResult<never>;
-    readonly format: OutputFormat;
-    readonly print: <T>(result: CommandResult<T>) => Effect.Effect<void>;
+export function printResult<T>(result: Result<T, string>, format: OutputFormat): void {
+  if (format === "json") {
+    console.log(
+      JSON.stringify(
+        Result.isOk(result) ? { ok: true, data: result.value } : { ok: false, error: result.error },
+        null,
+        2,
+      ),
+    );
+    return;
   }
->() {}
-
-export function makeOutputLayer(format: OutputFormat): Layer.Layer<OutputService> {
-  return Layer.succeed(OutputService, {
-    ok: <T>(data: T): CommandResult<T> => ({ ok: true as const, data }),
-    err: (error: string): CommandResult<never> => ({ ok: false as const, error }),
-    format,
-    print: <T>(result: CommandResult<T>): Effect.Effect<void> =>
-      Effect.sync(() => {
-        if (format === "json") {
-          console.log(JSON.stringify(result, null, 2));
-          return;
-        }
-        if (result.ok) {
-          printText(result.data);
-        } else {
-          console.error(pc.red(`Error: ${result.error}`));
-        }
-      }),
-  });
+  if (Result.isOk(result)) {
+    printText(result.value);
+  } else {
+    console.error(pc.red(`Error: ${result.error}`));
+  }
 }
 
-export const OutputLive = makeOutputLayer("json");
+export function printData<T>(data: T, format: OutputFormat): void {
+  if (format === "json") {
+    console.log(JSON.stringify({ ok: true, data }, null, 2));
+    return;
+  }
+  printText(data);
+}
+
+export function formatSessionError(err: SessionError): string {
+  return matchErrorPartial(
+    err,
+    {
+      SessionNotFoundError: () => "No active session.",
+      SessionReadError: (e) => `Failed to read session: ${e.cause}`,
+      SessionWriteError: (e) => `Failed to save session: ${e.cause}`,
+    },
+    () => String(err),
+  );
+}
+
+export function formatWalletError(err: WalletError): string {
+  return matchErrorPartial(
+    err,
+    {
+      WalletNotFoundError: () => "No wallet found. Run `stecli wallet login` first.",
+      WalletFetchError: (e) => `Failed to fetch wallet: ${e.cause}`,
+      WalletCreateError: (e) => `Failed to create wallet: ${e.cause}`,
+    },
+    () => String(err),
+  );
+}
+
+export function formatStellarError(err: StellarError): string {
+  return matchErrorPartial(
+    err,
+    {
+      StellarAccountError: (e) => `Failed to load account: ${e.cause}`,
+      StellarTransactionError: (e) => `Transaction failed: ${e.cause}`,
+      UnfundedAccountError: (e) =>
+        `Account ${e.address.slice(0, 8)}... is not funded. Send at least 1 XLM to activate it.`,
+      InsufficientBalanceError: (e) =>
+        `Insufficient balance. Need ${e.required} ${e.asset} but have ${e.available}.`,
+      NetworkTimeoutError: (e) =>
+        `Network error: Could not reach Horizon. Check your connection. (${e.cause})`,
+    },
+    () => String(err),
+  );
+}
+
+export function formatPaymentError(err: PaymentError): string {
+  return matchErrorPartial(
+    err,
+    {
+      PaymentHttpError: (e) => `Payment failed. Status: ${e.status}. Settle: ${e.settle ?? "none"}`,
+      PaymentSetupError: (e) => `Payment setup failed: ${e.cause}`,
+    },
+    () => String(err),
+  );
+}
+
+export function formatHorizonError(err: HorizonQueryError): string {
+  return matchErrorPartial(
+    err,
+    {
+      HorizonError: (e) => `Failed to fetch data from Horizon: ${e.cause}`,
+      UnfundedAccountError: (e) =>
+        `Account ${e.address.slice(0, 8)}... is not funded. Send at least 1 XLM to activate it.`,
+      NetworkTimeoutError: (e) =>
+        `Network error: Could not reach Horizon. Check your connection. (${e.cause})`,
+    },
+    () => String(err),
+  );
+}
 
 function printText(data: unknown): void {
   if (data === null || data === undefined) return;
@@ -48,7 +114,7 @@ function printText(data: unknown): void {
       return;
     }
     if (typeof data[0] === "object" && data[0] !== null) {
-      console.log(formatTable(data as ReadonlyArray<Record<string, unknown>>));
+      console.log(formatTable(data));
       return;
     }
     data.forEach((item) => console.log(String(item)));
@@ -72,7 +138,7 @@ function printText(data: unknown): void {
       if (Array.isArray(value)) {
         console.log(`\n${pc.bold(key)} (${value.length})`);
         if (value.length > 0 && typeof value[0] === "object" && value[0] !== null) {
-          console.log(formatTable(value as ReadonlyArray<Record<string, unknown>>));
+          console.log(formatTable(value));
         } else {
           value.forEach((item) => console.log(`  ${formatValue(item)}`));
         }
@@ -96,9 +162,16 @@ function formatValue(value: unknown): string {
   if (typeof value === "string") {
     if (/^G[A-Z2-7]{55}$/.test(value))
       return pc.magenta(value.slice(0, 8) + "..." + value.slice(-4));
-    return String(value);
+    return value;
   }
-  return String(value);
+  return JSON.stringify(value);
+}
+
+function stringifyCell(value: unknown): string {
+  if (value === null || value === undefined) return "—";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return JSON.stringify(value);
 }
 
 function formatTable(rows: ReadonlyArray<Record<string, unknown>>): string {
@@ -107,7 +180,7 @@ function formatTable(rows: ReadonlyArray<Record<string, unknown>>): string {
   const keys = Object.keys(rows[0]);
   const colWidths = keys.map((key) => {
     const headerLen = key.length;
-    const maxDataLen = Math.max(...rows.map((row) => String(row[key] ?? "—").length));
+    const maxDataLen = Math.max(...rows.map((row) => stringifyCell(row[key]).length));
     return Math.min(Math.max(headerLen, maxDataLen) + 2, 40);
   });
 
@@ -116,7 +189,7 @@ function formatTable(rows: ReadonlyArray<Record<string, unknown>>): string {
   const dataLines = rows.map((row) =>
     keys
       .map((key, i) =>
-        String(row[key] ?? "—")
+        stringifyCell(row[key])
           .slice(0, colWidths[i] - 1)
           .padEnd(colWidths[i]),
       )

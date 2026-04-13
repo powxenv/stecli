@@ -1,8 +1,43 @@
+import type { Result } from "better-result";
+import type {
+  AuthRequestError,
+  OtpVerifyError,
+  SessionNotFoundError,
+  SessionReadError,
+  SessionWriteError,
+  WalletNotFoundError,
+  WalletFetchError,
+  WalletCreateError,
+  StellarAccountError,
+  StellarTransactionError,
+  PaymentHttpError,
+  PaymentSetupError,
+  HorizonError,
+  UnfundedAccountError,
+  InsufficientBalanceError,
+  NetworkTimeoutError,
+} from "./errors.js";
+
 export type Network = "testnet" | "pubnet";
 
-export type CommandResult<T> =
-  | { readonly ok: true; readonly data: T }
-  | { readonly ok: false; readonly error: string };
+export type AuthError = AuthRequestError | OtpVerifyError;
+export type SessionError = SessionNotFoundError | SessionReadError | SessionWriteError;
+export type WalletError = WalletNotFoundError | WalletFetchError | WalletCreateError;
+export type StellarError =
+  | StellarAccountError
+  | StellarTransactionError
+  | UnfundedAccountError
+  | InsufficientBalanceError
+  | NetworkTimeoutError;
+export type PaymentError = PaymentHttpError | PaymentSetupError;
+export type HorizonQueryError = HorizonError | UnfundedAccountError | NetworkTimeoutError;
+
+export type AuthResult<T> = Result<T, AuthError>;
+export type SessionResult<T> = Result<T, SessionError>;
+export type WalletResult<T> = Result<T, WalletError>;
+export type StellarResult<T> = Result<T, StellarError>;
+export type PaymentResultType<T> = Result<T, PaymentError>;
+export type HorizonResult<T> = Result<T, HorizonQueryError>;
 
 export interface BalanceEntry {
   readonly assetType: string;
