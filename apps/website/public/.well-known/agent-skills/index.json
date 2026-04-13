@@ -6,7 +6,7 @@
       "type": "archive",
       "description": "Manage Stellar wallets, send payments, make X402 HTTP payments, query on-chain data, and expose everything via MCP. Use this skill when the user wants to set up a Stellar wallet, log in, verify OTP, check wallet balance, send XLM or assets, make X402 payments, view wallet address, query account data, search assets, check fees, stream live events, start an MCP server, or any other interaction with the stelagent CLI for Stellar.",
       "url": "/.well-known/agent-skills/stelagent-cli.tar.gz",
-      "digest": "sha256:e8335285376e2c4e4410e50c7cec710fcb41a54ea3380f75951d30f613451d13"
+      "digest": "sha256:62b5dc807c249be1e755991be70a2f7b787f125d5e7af00d9ba718d33978f038"
     }
   ]
 }

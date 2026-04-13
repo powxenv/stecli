@@ -1,4 +1,11 @@
 import { Resend } from "resend";
-import { env } from "#/env.ts";
+import { env } from "cloudflare:workers";
 
-export const resend = new Resend(env.RESEND_API_KEY);
+let _resend: Resend | null = null;
+
+export function getResend() {
+  if (!_resend) {
+    _resend = new Resend(env.RESEND_API_KEY);
+  }
+  return _resend;
+}

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
 import { Keypair } from "@stellar/stellar-base";
 import { wallets } from "#/db/schema";
-import { db } from "#/db/index.ts";
+import { getDb } from "#/db/index.ts";
 import { encryptSecretKey, decryptSecretKey } from "#/lib/server/crypto.ts";
 import { authenticate } from "#/lib/server/auth.ts";
 
@@ -14,6 +14,8 @@ export const Route = createFileRoute("/api/cli/wallet/create")({
         if (!email) {
           return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
         }
+
+        const db = getDb();
 
         const existing = await db.select().from(wallets).where(eq(wallets.email, email)).limit(1);
 
