@@ -49,7 +49,7 @@ export default function OtpEmail({ otp, email }: OtpEmailProps) {
         >
           <Section style={{ marginBottom: "40px" }}>
             <Img
-              src="https://stelagent.noval.me/stellar.svg"
+              src="https://stelagent.noval.me/stelagent.svg"
               alt="Stelagent"
               width="28"
               height="28"
