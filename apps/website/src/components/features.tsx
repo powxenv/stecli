@@ -42,7 +42,7 @@ export function Features() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-[url(/features.png)] p-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-[url(/features.jpg)] p-8">
         {features.map((feature) => (
           <div
             key={feature.title}

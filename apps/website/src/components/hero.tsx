@@ -117,7 +117,7 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="bg-[url(/hero.png)] bg-cover flex flex-col items-center justify-center p-8">
+      <div className="bg-[url(/hero.jpg)] bg-cover flex flex-col items-center justify-center p-8">
         <style>{`
           @keyframes fadeInDown {
             from { opacity: 0; transform: translateY(-12px); }

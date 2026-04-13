@@ -104,7 +104,7 @@ export function Commands() {
           </div>
         </div>
 
-        <div className="md:col-span-7 bg-[url(/hero.png)] bg-cover bg-center p-8">
+        <div className="md:col-span-7 bg-[url(/hero.jpg)] bg-cover bg-center p-8">
           <div className="space-y-2">
             {commands.map((group) => (
               <div
