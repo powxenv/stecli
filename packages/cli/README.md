@@ -12,7 +12,7 @@ Read https://stelagent.noval.me/AGENTS.md, then set it up for me.
 
 The agent reads the skill definition, handles wallet creation, OTP verification, and every Stellar operation on your behalf.
 
-### Install the skill permanently
+### Install the skill
 
 ```bash
 # Via flins (recommended)
@@ -22,7 +22,7 @@ npx flins@latest add stelagent.noval.me
 npx skills add stelagent.noval.me/stelagent-cli
 ```
 
-Both commands download the skill into your project's `.agents/skills/` directory and wire it into your agent's configuration automatically.
+Both commands download the skill into your project's skills directory and wire it into your agent's configuration automatically.
 
 ## Install
 
@@ -39,51 +39,51 @@ No install needed — `npx` always runs the latest published version.
 ### Wallet
 
 ```bash
-stelagent wallet login -e you@example.com                    # Request OTP
-stelagent wallet verify -e you@example.com -o 123456          # Verify OTP
-stelagent wallet address                                     # Show public key
-stelagent wallet balance                                    # Check balances
-stelagent wallet transfer -t GDXXX... -a 10                  # Send XLM
-stelagent wallet logout                                     # Clear session
+npx stelagent@latest wallet login -e you@example.com                    # Request OTP
+npx stelagent@latest wallet verify -e you@example.com -o 123456          # Verify OTP
+npx stelagent@latest wallet address                                     # Show public key
+npx stelagent@latest wallet balance                                    # Check balances
+npx stelagent@latest wallet transfer -t GDXXX... -a 10                  # Send XLM
+npx stelagent@latest wallet logout                                     # Clear session
 ```
 
 ### Payments
 
 ```bash
-stelagent send GDXXX... 100 -a USDC:GAXYZ...                # Custom asset
-stelagent send GDXXX... 50 -a native --memo text:ref-99     # XLM with memo
-stelagent pay https://api.example.com/premium                # x402 payment
+npx stelagent@latest send GDXXX... 100 -a USDC:GAXYZ...                # Custom asset
+npx stelagent@latest send GDXXX... 50 -a native --memo text:ref-99     # XLM with memo
+npx stelagent@latest pay https://api.example.com/premium                # x402 payment
 ```
 
 ### Account queries
 
 ```bash
-stelagent account details GDXXX...          # Balances, signers, thresholds
-stelagent account transactions GDXXX...      # Transaction history
-stelagent account payments GDXXX...          # Payment history
-stelagent account effects GDXXX...           # Effect history
+npx stelagent@latest account details GDXXX...          # Balances, signers, thresholds
+npx stelagent@latest account transactions GDXXX...      # Transaction history
+npx stelagent@latest account payments GDXXX...          # Payment history
+npx stelagent@latest account effects GDXXX...           # Effect history
 ```
 
 ### Assets & fees
 
 ```bash
-stelagent assets search --code USDC                              # Search assets
-stelagent assets orderbook --selling XLM --buying USDC:G...     # Order book
-stelagent fee                                                    # Fee stats
+npx stelagent@latest assets search --code USDC                              # Search assets
+npx stelagent@latest assets orderbook --selling XLM --buying USDC:G...     # Order book
+npx stelagent@latest fee                                                    # Fee stats
 ```
 
 ### Streaming
 
 ```bash
-stelagent monitor transactions GDXXX...     # Stream transactions
-stelagent monitor payments GDXXX...         # Stream payments
-stelagent monitor effects GDXXX...          # Stream effects
+npx stelagent@latest monitor transactions GDXXX...     # Stream transactions
+npx stelagent@latest monitor payments GDXXX...         # Stream payments
+npx stelagent@latest monitor effects GDXXX...          # Stream effects
 ```
 
 ### MCP server
 
 ```bash
-stelagent mcp    # Start MCP server on stdio
+npx stelagent@latest mcp    # Start MCP server on stdio
 ```
 
 All commands accept `-n testnet|pubnet` (default: `testnet`) and `-f json|text`. Account and asset queries support `--limit`, `--cursor`, and `--order asc|desc`.
