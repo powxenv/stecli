@@ -166,7 +166,7 @@ stecli/
 │       ├── env.ts             # T3Env typed env vars
 │       └── styles.css         # HeroUI theme (light/dark oklch)
 ├── packages/                  # EMPTY
-├── tools/agent/               # @stecli/cli (was @centsh/agent)
+├── packages/cli/                # @stecli/cli (was @centsh/agent)
 │   └── src/
 │       ├── index.ts            # Entry: citty + runMain
 │       ├── domain/
@@ -352,9 +352,9 @@ stecli/
 │       │   ├── payment.ts            # x402 + standard payment flows
 │       │   └── types.ts              # Shared types
 │       └── package.json
-├── tools/
-│   └── cli/                         # @stecli/cli — the CLI binary
-│       ├── src/
+├── packages/
+│   ├── cli/                         # @stecli/cli — the CLI binary
+│   │   ├── src/
 │       │   ├── index.ts              # Entry: defineCommand + runMain
 │       │   ├── domain/
 │       │   │   ├── errors.ts         # Tagged error classes
@@ -449,7 +449,7 @@ x402 Payment:  stecli pay (detect 402 → sign → settle) → stellar-account (
 The MCP server exposes all CLI capabilities as tools over stdio (JSON-RPC 2.0):
 
 ```typescript
-// tools/cli/src/mcp/mod.ts
+// packages/cli/src/mcp/mod.ts
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 

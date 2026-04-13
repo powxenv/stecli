@@ -6,7 +6,7 @@ Stecli provides a skill-based command architecture for interacting with the Stel
 
 ## Architecture
 
-- **`tools/cli/src/`** — CLI binary (`stecli`), built with citty + Effect-TS
+- **`packages/cli/src/`** — CLI binary (`stecli`), built with citty + Effect-TS
 - **`apps/website/`** — TanStack Start web app (API server + dashboard)
 - **`skills/`** — Agent skill definitions (SKILL.md + CLI command references)
 
