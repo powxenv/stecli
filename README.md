@@ -112,6 +112,7 @@ npx stelagent@latest wallet logout                          # Clear session
 npx stelagent@latest send GDXXX... 100 -a USDC:GAXYZ...            # Custom asset
 npx stelagent@latest send GDXXX... 50 -a native --memo text:ref-99  # XLM with memo
 npx stelagent@latest pay https://api.example.com/premium             # x402 payment
+npx stelagent@latest preflight GDXXX... 10                           # Validate payment before sending
 ```
 
 ### Account queries
@@ -259,7 +260,7 @@ Every command is logged to `~/.stelagent/audit.jsonl` with timestamp, command, d
 
 ## MCP tool surface
 
-The MCP server exposes 15 tools with 1:1 parity to the CLI. Stream commands (`monitor`) are the only exception — SSE doesn't fit the request/response model.
+The MCP server exposes 16 tools with 1:1 parity to the CLI. Stream commands (`monitor`) are the only exception — SSE doesn't fit the request/response model.
 
 | Category | Tool                   | CLI equivalent          | Auth |
 | -------- | ---------------------- | ----------------------- | ---- |
@@ -278,6 +279,7 @@ The MCP server exposes 15 tools with 1:1 parity to the CLI. Stream commands (`mo
 | Network  | `fee_stats`            | `fee`                   | No   |
 | Payment  | `send_payment`         | `send`                  | Yes  |
 | Payment  | `pay_url`              | `pay`                   | Yes  |
+| Payment  | `preflight_check`      | `preflight`             | Yes  |
 
 ## Security
 
@@ -289,12 +291,12 @@ The MCP server exposes 15 tools with 1:1 parity to the CLI. Stream commands (`mo
 
 ## Roadmap
 
+- ~~**Pre-flight checks** — fee estimation, balance validation~~ ✅
 - **Liquidity pool operations** — deposit, withdraw, swap
 - **Soroban smart contracts** — deploy, simulate, invoke
 - **Path payment routing** — multi-hop FX between assets
 - **Claimable balances** — create and claim with custom schedules
 - **Transaction simulation** — preview before signing
-- **Pre-flight checks** — fee estimation, balance validation
 - **Confirmation prompts** — explicit confirmation for high-value transfers
 - **Integration tests** — runnable suite against Horizon testnet
 - **Webhook notifications** — push alerts on incoming payments

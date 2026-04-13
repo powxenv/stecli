@@ -170,6 +170,49 @@ npx stelagent@latest pay <url> [-f json|text]
 { "ok": true, "data": { "url": "...", "status": 200, "paymentRequired": false } }
 ```
 
+## preflight
+
+Validate a payment before sending. Checks sender balance, fee estimates, and destination status. Requires wallet session.
+
+```bash
+npx stelagent@latest preflight <destination> <amount> [-a asset] [-n testnet|pubnet] [-f json|text]
+```
+
+| Arg         | Flag     | Required | Default   | Description                       |
+| ----------- | -------- | -------- | --------- | --------------------------------- |
+| destination | position | yes      | —         | Destination G-address             |
+| amount      | position | yes      | —         | Amount to validate (up to 7 dp)   |
+| asset       | `-a`     | no       | `native`  | `native` for XLM or `CODE:ISSUER` |
+| network     | `-n`     | no       | `testnet` | Stellar network                   |
+| format      | `-f`     | no       | `json`    | Output format                     |
+
+**Output:**
+
+```json
+{
+  "ok": true,
+  "data": {
+    "canProceed": true,
+    "sender": "GABCD...WXYZ",
+    "destination": "GEFGH...1234",
+    "amount": "10",
+    "asset": "XLM",
+    "network": "testnet",
+    "senderFunded": true,
+    "destinationFunded": true,
+    "destinationFundingRequired": false,
+    "balances": [
+      { "asset": "XLM", "available": "9999.0000000", "needed": "10.0000100", "sufficient": true }
+    ],
+    "estimatedFee": "100",
+    "baseReserve": "1",
+    "warnings": []
+  }
+}
+```
+
+When `canProceed` is `false`, the `warnings` array explains what would prevent the transaction.
+
 ## send
 
 Send any asset payment.

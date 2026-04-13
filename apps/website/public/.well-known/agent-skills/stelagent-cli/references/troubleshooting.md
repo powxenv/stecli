@@ -4,6 +4,7 @@
 
 ## Send / Transfer
 
+- **Preflight check**: Use `npx stelagent@latest preflight <addr> <amount>` to validate a payment before sending. Returns `canProceed`, balance details, fee estimate, and warnings about unfunded destinations.
 - **Insufficient balance**: Check balance first with `npx stelagent@latest wallet balance`. Warn if remaining would fall below minimum reserve (1 XLM base + 0.5 XLM per trustline/offer/signer).
 - **Unfunded destination**: If the destination account doesn't exist on the network, the send transaction will fail with `StellarAccountError`. The destination must first receive at least 1 XLM from a funded account.
 - **Invalid asset format**: Custom assets must be `CODE:ISSUER` (e.g., `USDC:GBXK...`). If format is wrong, CLI returns a Zod validation error.

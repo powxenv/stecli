@@ -92,6 +92,7 @@ Stellar public keys start with `G`, followed by 55 uppercase alphanumeric charac
 | --- | ---------------------------------------------------------------- | -------------------------------------------- | ---- |
 | B1  | `npx stelagent@latest pay <url>`                                 | X402 micropayment (detects 402, signs, pays) | Yes  |
 | B2  | `npx stelagent@latest send <addr> <amount> [-a asset] [-m memo]` | Send any asset (XLM or custom)               | Yes  |
+| B3  | `npx stelagent@latest preflight <addr> <amount> [-a asset]`      | Validate a payment before sending            | Yes  |
 
 ### C — Account Queries (Public, No Auth)
 
@@ -230,11 +231,13 @@ npx stelagent@latest wallet logout
 ```
 1. Check auth:       npx stelagent@latest wallet address
    ↓ if not logged in → Flow 1
-2. Check balance:    npx stelagent@latest wallet balance
+2. Preflight:        npx stelagent@latest preflight GDXYZ... 10
+   ↓ verify canProceed is true, review warnings
+3. Check balance:    npx stelagent@latest wallet balance
    ↓ verify sufficient balance (include 1 XLM minimum reserve)
-3. Send:             npx stelagent@latest send GDXYZ... 10
+4. Send:             npx stelagent@latest send GDXYZ... 10
    ↓ returns { from, to, amount, asset, txHash }
-4. Confirm:          "Sent 10 XLM to GDXYZ...WXYZ. Tx: <hash>"
+5. Confirm:          "Sent 10 XLM to GDXYZ...WXYZ. Tx: <hash>"
 ```
 
 <SHOULD>
@@ -250,8 +253,8 @@ Before sending, check the balance and warn if the remaining balance after the se
    ↓ verify asset exists, note issuer
 2. Check auth:       npx stelagent@latest wallet address
    ↓ if not logged in → Flow 1
-3. Check balance:    npx stelagent@latest wallet balance
-   ↓ verify USDC balance
+3. Preflight:        npx stelagent@latest preflight GDXYZ... 100 -a "USDC:GAXYZ..."
+   ↓ verify canProceed is true
 4. Send:             npx stelagent@latest send GDXYZ... 100 -a "USDC:GAXYZ..."
    ↓ returns { from, to, amount, asset, txHash, ledger }
 5. Confirm:          "Sent 100 USDC to GDXYZ...WXYZ. Tx: <hash>"
@@ -339,7 +342,7 @@ The MCP server provides **1:1 parity** with the CLI — every CLI command has a 
 npx stelagent@latest mcp
 ```
 
-### MCP Tool Surface (15 Tools)
+### MCP Tool Surface (16 Tools)
 
 | Category | Tool                   | CLI Equivalent          | Description                         | Auth |
 | -------- | ---------------------- | ----------------------- | ----------------------------------- | ---- |
@@ -358,6 +361,7 @@ npx stelagent@latest mcp
 | Assets   | `fee_stats`            | `fee`                   | Current fee statistics              | No   |
 | Payment  | `send_payment`         | `send`                  | Send any asset payment              | Yes  |
 | Payment  | `pay_url`              | `pay`                   | X402 payment to a URL               | Yes  |
+| Payment  | `preflight_check`      | `preflight`             | Validate a payment before sending   | Yes  |
 
 ### MCP Authentication Flow
 

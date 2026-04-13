@@ -251,6 +251,29 @@ export interface CandleRecord {
   readonly close: string;
 }
 
+export interface PreflightBalance {
+  readonly asset: string;
+  readonly available: string;
+  readonly needed: string;
+  readonly sufficient: boolean;
+}
+
+export interface PreflightCheck {
+  readonly canProceed: boolean;
+  readonly sender: string;
+  readonly destination: string;
+  readonly amount: string;
+  readonly asset: string;
+  readonly network: Network;
+  readonly senderFunded: boolean;
+  readonly destinationFunded: boolean;
+  readonly destinationFundingRequired: boolean;
+  readonly balances: ReadonlyArray<PreflightBalance>;
+  readonly estimatedFee: string;
+  readonly baseReserve: string;
+  readonly warnings: ReadonlyArray<string>;
+}
+
 export interface StreamEvent<T> {
   readonly type: "message" | "error";
   readonly data: T;
