@@ -9,7 +9,7 @@ export function Navbar() {
       </div>
       <div className="flex items-center gap-6 text-sm text-muted">
         <a
-          href="https://github.com"
+          href="https://github.com/powxenv/stelagent"
           target="_blank"
           rel="noopener noreferrer"
           className="hover:text-foreground transition-colors"

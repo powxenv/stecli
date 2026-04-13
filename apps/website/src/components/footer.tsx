@@ -26,7 +26,7 @@ export function Footer() {
             Horizon API
           </a>
           <a
-            href="https://github.com"
+            href="https://github.com/powxenv/stelagent"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-foreground transition-colors"
