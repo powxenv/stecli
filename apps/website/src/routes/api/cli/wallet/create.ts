@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
-import { randomBytes, scryptSync, createCipheriv, createDecipheriv } from "node:crypto";
 import { Keypair } from "@stellar/stellar-base";
 import { walletSessions, wallets } from "#/db/schema";
 import { db } from "#/db/index.ts";
+import { encryptSecretKey, decryptSecretKey } from "#/lib/server/crypto.ts";
 
 export const Route = createFileRoute("/api/cli/wallet/create")({
   server: {
@@ -84,34 +84,4 @@ async function authenticate(request: Request): Promise<string | null> {
   if (new Date() > session.expiresAt) return null;
 
   return session.email;
-}
-
-function encryptSecretKey(secretKey: string): {
-  encrypted: string;
-  salt: string;
-  iv: string;
-} {
-  const salt = randomBytes(16);
-  const key = scryptSync(secretKey, salt, 32);
-  const iv = randomBytes(16);
-  const cipher = createCipheriv("aes-256-gcm", key, iv);
-  const encrypted = Buffer.concat([cipher.update(secretKey, "utf8"), cipher.final()]);
-  const authTag = cipher.getAuthTag();
-  return {
-    encrypted: Buffer.concat([encrypted, authTag]).toString("hex"),
-    salt: salt.toString("hex"),
-    iv: iv.toString("hex"),
-  };
-}
-
-function decryptSecretKey(encryptedHex: string, saltHex: string, ivHex: string): string {
-  const data = Buffer.from(encryptedHex, "hex");
-  const salt = Buffer.from(saltHex, "hex");
-  const iv = Buffer.from(ivHex, "hex");
-  const authTag = data.subarray(data.length - 16);
-  const encrypted = data.subarray(0, data.length - 16);
-  const key = scryptSync(encryptedHex, salt, 32);
-  const decipher = createDecipheriv("aes-256-gcm", key, iv);
-  decipher.setAuthTag(authTag);
-  return decipher.update(encrypted) + decipher.final("utf8");
 }

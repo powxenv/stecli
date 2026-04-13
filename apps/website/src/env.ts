@@ -6,6 +6,7 @@ export const env = createEnv({
     NEON_DATABASE_URL: z.string(),
     NEON_DATA_API_URL: z.string(),
     RESEND_API_KEY: z.string(),
+    WALLET_ENCRYPTION_KEY: z.string().min(32),
   },
 
   /**

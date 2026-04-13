@@ -2,9 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { eq } from "drizzle-orm";
 import { walletSessions, wallets } from "#/db/schema";
 import { db } from "#/db/index.ts";
-import { decryptSecretKey } from "#/lib/server/crypto.ts";
 
-export const Route = createFileRoute("/api/cli/wallet/")({
+export const Route = createFileRoute("/api/cli/wallet/address")({
   server: {
     handlers: {
       GET: async ({ request }) => {
@@ -20,16 +19,13 @@ export const Route = createFileRoute("/api/cli/wallet/")({
         }
 
         const wallet = result[0];
-        const secretKey = decryptSecretKey(wallet.encryptedSecretKey, wallet.salt, wallet.iv);
 
         return Response.json({
           ok: true,
-          wallet: {
-            email: wallet.email,
+          address: {
             publicKey: wallet.publicKey,
             network: wallet.network,
-            secretKey,
-            createdAt: wallet.createdAt,
+            email: wallet.email,
           },
         });
       },

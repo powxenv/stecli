@@ -8,149 +8,191 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as ApiCliWalletIndexRouteImport } from "./routes/api/cli/wallet/index";
-import { Route as ApiCliWalletCreateRouteImport } from "./routes/api/cli/wallet/create";
-import { Route as ApiCliAuthOtpVerifyRouteImport } from "./routes/api/cli/auth/otp/verify";
-import { Route as ApiCliAuthOtpRequestRouteImport } from "./routes/api/cli/auth/otp/request";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiCliWalletIndexRouteImport } from './routes/api/cli/wallet/index'
+import { Route as ApiCliWalletSignRouteImport } from './routes/api/cli/wallet/sign'
+import { Route as ApiCliWalletCreateRouteImport } from './routes/api/cli/wallet/create'
+import { Route as ApiCliWalletAddressRouteImport } from './routes/api/cli/wallet/address'
+import { Route as ApiCliAuthOtpVerifyRouteImport } from './routes/api/cli/auth/otp/verify'
+import { Route as ApiCliAuthOtpRequestRouteImport } from './routes/api/cli/auth/otp/request'
 
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ApiCliWalletIndexRoute = ApiCliWalletIndexRouteImport.update({
-  id: "/api/cli/wallet/",
-  path: "/api/cli/wallet/",
+  id: '/api/cli/wallet/',
+  path: '/api/cli/wallet/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const ApiCliWalletSignRoute = ApiCliWalletSignRouteImport.update({
+  id: '/api/cli/wallet/sign',
+  path: '/api/cli/wallet/sign',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCliWalletCreateRoute = ApiCliWalletCreateRouteImport.update({
-  id: "/api/cli/wallet/create",
-  path: "/api/cli/wallet/create",
+  id: '/api/cli/wallet/create',
+  path: '/api/cli/wallet/create',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const ApiCliWalletAddressRoute = ApiCliWalletAddressRouteImport.update({
+  id: '/api/cli/wallet/address',
+  path: '/api/cli/wallet/address',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCliAuthOtpVerifyRoute = ApiCliAuthOtpVerifyRouteImport.update({
-  id: "/api/cli/auth/otp/verify",
-  path: "/api/cli/auth/otp/verify",
+  id: '/api/cli/auth/otp/verify',
+  path: '/api/cli/auth/otp/verify',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ApiCliAuthOtpRequestRoute = ApiCliAuthOtpRequestRouteImport.update({
-  id: "/api/cli/auth/otp/request",
-  path: "/api/cli/auth/otp/request",
+  id: '/api/cli/auth/otp/request',
+  path: '/api/cli/auth/otp/request',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/api/cli/wallet/create": typeof ApiCliWalletCreateRoute;
-  "/api/cli/wallet/": typeof ApiCliWalletIndexRoute;
-  "/api/cli/auth/otp/request": typeof ApiCliAuthOtpRequestRoute;
-  "/api/cli/auth/otp/verify": typeof ApiCliAuthOtpVerifyRoute;
+  '/': typeof IndexRoute
+  '/api/cli/wallet/address': typeof ApiCliWalletAddressRoute
+  '/api/cli/wallet/create': typeof ApiCliWalletCreateRoute
+  '/api/cli/wallet/sign': typeof ApiCliWalletSignRoute
+  '/api/cli/wallet/': typeof ApiCliWalletIndexRoute
+  '/api/cli/auth/otp/request': typeof ApiCliAuthOtpRequestRoute
+  '/api/cli/auth/otp/verify': typeof ApiCliAuthOtpVerifyRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/api/cli/wallet/create": typeof ApiCliWalletCreateRoute;
-  "/api/cli/wallet": typeof ApiCliWalletIndexRoute;
-  "/api/cli/auth/otp/request": typeof ApiCliAuthOtpRequestRoute;
-  "/api/cli/auth/otp/verify": typeof ApiCliAuthOtpVerifyRoute;
+  '/': typeof IndexRoute
+  '/api/cli/wallet/address': typeof ApiCliWalletAddressRoute
+  '/api/cli/wallet/create': typeof ApiCliWalletCreateRoute
+  '/api/cli/wallet/sign': typeof ApiCliWalletSignRoute
+  '/api/cli/wallet': typeof ApiCliWalletIndexRoute
+  '/api/cli/auth/otp/request': typeof ApiCliAuthOtpRequestRoute
+  '/api/cli/auth/otp/verify': typeof ApiCliAuthOtpVerifyRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/api/cli/wallet/create": typeof ApiCliWalletCreateRoute;
-  "/api/cli/wallet/": typeof ApiCliWalletIndexRoute;
-  "/api/cli/auth/otp/request": typeof ApiCliAuthOtpRequestRoute;
-  "/api/cli/auth/otp/verify": typeof ApiCliAuthOtpVerifyRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/api/cli/wallet/address': typeof ApiCliWalletAddressRoute
+  '/api/cli/wallet/create': typeof ApiCliWalletCreateRoute
+  '/api/cli/wallet/sign': typeof ApiCliWalletSignRoute
+  '/api/cli/wallet/': typeof ApiCliWalletIndexRoute
+  '/api/cli/auth/otp/request': typeof ApiCliAuthOtpRequestRoute
+  '/api/cli/auth/otp/verify': typeof ApiCliAuthOtpVerifyRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/api/cli/wallet/create"
-    | "/api/cli/wallet/"
-    | "/api/cli/auth/otp/request"
-    | "/api/cli/auth/otp/verify";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/api/cli/wallet/address'
+    | '/api/cli/wallet/create'
+    | '/api/cli/wallet/sign'
+    | '/api/cli/wallet/'
+    | '/api/cli/auth/otp/request'
+    | '/api/cli/auth/otp/verify'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/api/cli/wallet/create"
-    | "/api/cli/wallet"
-    | "/api/cli/auth/otp/request"
-    | "/api/cli/auth/otp/verify";
+    | '/'
+    | '/api/cli/wallet/address'
+    | '/api/cli/wallet/create'
+    | '/api/cli/wallet/sign'
+    | '/api/cli/wallet'
+    | '/api/cli/auth/otp/request'
+    | '/api/cli/auth/otp/verify'
   id:
-    | "__root__"
-    | "/"
-    | "/api/cli/wallet/create"
-    | "/api/cli/wallet/"
-    | "/api/cli/auth/otp/request"
-    | "/api/cli/auth/otp/verify";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/api/cli/wallet/address'
+    | '/api/cli/wallet/create'
+    | '/api/cli/wallet/sign'
+    | '/api/cli/wallet/'
+    | '/api/cli/auth/otp/request'
+    | '/api/cli/auth/otp/verify'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  ApiCliWalletCreateRoute: typeof ApiCliWalletCreateRoute;
-  ApiCliWalletIndexRoute: typeof ApiCliWalletIndexRoute;
-  ApiCliAuthOtpRequestRoute: typeof ApiCliAuthOtpRequestRoute;
-  ApiCliAuthOtpVerifyRoute: typeof ApiCliAuthOtpVerifyRoute;
+  IndexRoute: typeof IndexRoute
+  ApiCliWalletAddressRoute: typeof ApiCliWalletAddressRoute
+  ApiCliWalletCreateRoute: typeof ApiCliWalletCreateRoute
+  ApiCliWalletSignRoute: typeof ApiCliWalletSignRoute
+  ApiCliWalletIndexRoute: typeof ApiCliWalletIndexRoute
+  ApiCliAuthOtpRequestRoute: typeof ApiCliAuthOtpRequestRoute
+  ApiCliAuthOtpVerifyRoute: typeof ApiCliAuthOtpVerifyRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/cli/wallet/": {
-      id: "/api/cli/wallet/";
-      path: "/api/cli/wallet";
-      fullPath: "/api/cli/wallet/";
-      preLoaderRoute: typeof ApiCliWalletIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/cli/wallet/create": {
-      id: "/api/cli/wallet/create";
-      path: "/api/cli/wallet/create";
-      fullPath: "/api/cli/wallet/create";
-      preLoaderRoute: typeof ApiCliWalletCreateRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/cli/auth/otp/verify": {
-      id: "/api/cli/auth/otp/verify";
-      path: "/api/cli/auth/otp/verify";
-      fullPath: "/api/cli/auth/otp/verify";
-      preLoaderRoute: typeof ApiCliAuthOtpVerifyRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/cli/auth/otp/request": {
-      id: "/api/cli/auth/otp/request";
-      path: "/api/cli/auth/otp/request";
-      fullPath: "/api/cli/auth/otp/request";
-      preLoaderRoute: typeof ApiCliAuthOtpRequestRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cli/wallet/': {
+      id: '/api/cli/wallet/'
+      path: '/api/cli/wallet'
+      fullPath: '/api/cli/wallet/'
+      preLoaderRoute: typeof ApiCliWalletIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cli/wallet/sign': {
+      id: '/api/cli/wallet/sign'
+      path: '/api/cli/wallet/sign'
+      fullPath: '/api/cli/wallet/sign'
+      preLoaderRoute: typeof ApiCliWalletSignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cli/wallet/create': {
+      id: '/api/cli/wallet/create'
+      path: '/api/cli/wallet/create'
+      fullPath: '/api/cli/wallet/create'
+      preLoaderRoute: typeof ApiCliWalletCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cli/wallet/address': {
+      id: '/api/cli/wallet/address'
+      path: '/api/cli/wallet/address'
+      fullPath: '/api/cli/wallet/address'
+      preLoaderRoute: typeof ApiCliWalletAddressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cli/auth/otp/verify': {
+      id: '/api/cli/auth/otp/verify'
+      path: '/api/cli/auth/otp/verify'
+      fullPath: '/api/cli/auth/otp/verify'
+      preLoaderRoute: typeof ApiCliAuthOtpVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cli/auth/otp/request': {
+      id: '/api/cli/auth/otp/request'
+      path: '/api/cli/auth/otp/request'
+      fullPath: '/api/cli/auth/otp/request'
+      preLoaderRoute: typeof ApiCliAuthOtpRequestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiCliWalletAddressRoute: ApiCliWalletAddressRoute,
   ApiCliWalletCreateRoute: ApiCliWalletCreateRoute,
+  ApiCliWalletSignRoute: ApiCliWalletSignRoute,
   ApiCliWalletIndexRoute: ApiCliWalletIndexRoute,
   ApiCliAuthOtpRequestRoute: ApiCliAuthOtpRequestRoute,
   ApiCliAuthOtpVerifyRoute: ApiCliAuthOtpVerifyRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from "./router.tsx";
-import type { createStart } from "@tanstack/react-start";
-declare module "@tanstack/react-start" {
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
   interface Register {
-    ssr: true;
-    router: Awaited<ReturnType<typeof getRouter>>;
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
   }
 }
