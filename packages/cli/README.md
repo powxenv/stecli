@@ -1,87 +1,105 @@
-# @stelagent/cli
+# Stelagent CLI
 
-Modular, agent-first CLI for Stellar — wallet, payments, markets, and DeFi.
+Modular, agent-first CLI for Stellar — wallet, payments, markets, and monitoring.
 
-## Quick Start
+## Quick start for AI agents
 
-```bash
-npx @stelagent/cli wallet login -e you@example.com
+Paste this prompt into any AI agent (Claude Code, Cursor, OpenCode, OpenClaw, Hermes Agent, etc.) and chat naturally:
+
+```
+Read https://stelagent.noval.me/AGENTS.md, then set it up for me.
 ```
 
-Prompts for an OTP sent to your email, then creates or recovers your Stellar wallet.
+The agent reads the skill definition, handles wallet creation, OTP verification, and every Stellar operation on your behalf.
 
-## Usage
-
-```bash
-stelagent <command> [options]
-```
-
-### `wallet login`
-
-Sign in with email to create or recover your wallet.
+### Install the skill permanently
 
 ```bash
-stelagent wallet login -e you@example.com
-stelagent wallet login -e you@example.com -n testnet
+# Via flins (recommended)
+npx flins@latest add stelagent.noval.me
+
+# Via skills.sh
+npx skills add stelagent.noval.me/stelagent-cli
 ```
 
-| Flag            | Description                                |
-| --------------- | ------------------------------------------ |
-| `-e, --email`   | Your email address (required)              |
-| `-n, --network` | `testnet` or `pubnet` (default: `testnet`) |
+Both commands download the skill into your project's `.agents/skills/` directory and wire it into your agent's configuration automatically.
 
-One email always maps to one wallet. Logging in from any device with the same email recovers the same wallet.
-
-### `wallet address`
-
-Show the wallet public key.
+## Install
 
 ```bash
-stelagent wallet address
+npx stelagent@latest <command>
+# or
+bunx stelagent@latest <command>
 ```
 
-### `wallet balance`
+No install needed — `npx` always runs the latest published version.
 
-Show token balances.
+## Commands
+
+### Wallet
 
 ```bash
-stelagent wallet balance
+stelagent wallet login -e you@example.com                    # Request OTP
+stelagent wallet verify -e you@example.com -o 123456          # Verify OTP
+stelagent wallet address                                     # Show public key
+stelagent wallet balance                                    # Check balances
+stelagent wallet transfer -t GDXXX... -a 10                  # Send XLM
+stelagent wallet logout                                     # Clear session
 ```
 
-### `wallet transfer`
-
-Send XLM to another Stellar address.
+### Payments
 
 ```bash
-stelagent wallet transfer -t GDXXX... -a 10
+stelagent send GDXXX... 100 -a USDC:GAXYZ...                # Custom asset
+stelagent send GDXXX... 50 -a native --memo text:ref-99     # XLM with memo
+stelagent pay https://api.example.com/premium                # x402 payment
 ```
 
-| Flag           | Description                       |
-| -------------- | --------------------------------- |
-| `-t, --to`     | Destination public key (required) |
-| `-a, --amount` | Amount in XLM (required)          |
-
-### `wallet logout`
-
-Clear the local session.
+### Account queries
 
 ```bash
-stelagent wallet logout
+stelagent account details GDXXX...          # Balances, signers, thresholds
+stelagent account transactions GDXXX...      # Transaction history
+stelagent account payments GDXXX...          # Payment history
+stelagent account effects GDXXX...           # Effect history
 ```
 
-### `pay <url>`
-
-Make an x402 payment to access a paywalled resource.
+### Assets & fees
 
 ```bash
-stelagent pay https://api.example.com/premium
+stelagent assets search --code USDC                              # Search assets
+stelagent assets orderbook --selling XLM --buying USDC:G...     # Order book
+stelagent fee                                                    # Fee stats
 ```
 
-If the URL returns HTTP 402, the CLI negotiates payment using the x402 protocol and retries with a signed payment header.
+### Streaming
+
+```bash
+stelagent monitor transactions GDXXX...     # Stream transactions
+stelagent monitor payments GDXXX...         # Stream payments
+stelagent monitor effects GDXXX...          # Stream effects
+```
+
+### MCP server
+
+```bash
+stelagent mcp    # Start MCP server on stdio
+```
+
+All commands accept `-n testnet|pubnet` (default: `testnet`) and `-f json|text`. Account and asset queries support `--limit`, `--cursor`, and `--order asc|desc`.
+
+## Authentication
+
+Two-step OTP flow:
+
+1. **`wallet login -e <email>`** — sends a one-time code to your email
+2. **`wallet verify -e <email> -o <code>`** — verifies the code and creates (or recovers) your wallet
+
+One email maps to one wallet, recoverable from any device.
 
 ## Output
 
-All commands output structured JSON:
+All commands return structured JSON:
 
 ```json
 { "ok": true, "data": { ... } }
@@ -91,9 +109,11 @@ All commands output structured JSON:
 { "ok": false, "error": "..." }
 ```
 
+Use `--format text` for human-readable output.
+
 ## Architecture
 
-Wallets are stored server-side — one wallet per email, recoverable from any device. The CLI only holds a session token locally (`~/.stelagent/session.json`). Secret keys are fetched from the server over HTTPS on each command invocation and never persisted to disk.
+Wallets are stored server-side — one wallet per email, recoverable from any device. The CLI only holds a session token locally (`~/.stelagent/session.json`). Secret keys are fetched over HTTPS when needed and never written to disk.
 
 ## Development
 
